@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תמיכה — NextOne</title>
+<meta name="description" content="קבצי התקנה לתמיכה מרחוק, גיבוי ענן וכלי עזר — NextOne.">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&family=IBM+Plex+Sans+Hebrew:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1F3F5; --panel:#FFFFFF; --panel-2:#F7F8F9;
+    --ink:#14181D; --ink-soft:#4B535C; --ink-faint:#8A929B;
+    --rule:#D8DCE1; --accent:#B9860B; --accent-strong:#96690A; --accent-contrast:#14181D;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#14181D; --panel:#1B2027; --panel-2:#20262D;
+      --ink:#E9ECEF; --ink-soft:#A7AFB8; --ink-faint:#6B7480;
+      --rule:#2B323A; --accent:#DCA824; --accent-strong:#EEBD40; --accent-contrast:#14181D;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans Hebrew', Arial, sans-serif;}
+  .page{direction:rtl; text-align:right; padding-inline:20px;}
+  .wrap{max-width:760px; margin:0 auto;}
+  h1,h2{font-family:'Rubik', Arial, sans-serif; font-weight:800; text-wrap:balance; margin:0;}
+  p{margin:0; line-height:1.7;}
+  a{color:inherit;}
+
+  header{padding-block:22px; border-bottom:1px solid var(--rule);}
+  .nav{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:center; gap:11px;}
+  .brand-mark{width:38px; height:38px; border:2px solid var(--accent); color:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:14px;}
+  .brand-word{font-family:'Rubik',sans-serif; font-weight:900; font-size:19px; letter-spacing:-.01em;}
+  .brand-tag{font-size:11px; color:var(--ink-faint); margin-top:1px;}
+  a:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+
+  .hero{padding-block:44px 8px;}
+  .hero h1{font-size:clamp(24px,4vw,32px);}
+  .hero p{margin-top:14px; color:var(--ink-soft); font-size:15px; max-width:56ch;}
+
+  section{padding-block:34px; border-top:1px solid var(--rule);}
+  .kicker{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-faint); letter-spacing:.06em; margin-bottom:14px;}
+
+  .dl-list{display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule);}
+  .dl-row{background:var(--panel); padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .dl-name{font-weight:700; font-size:15px;}
+  .dl-desc{color:var(--ink-soft); font-size:13.3px; margin-top:3px;}
+  .dl-btn{flex-shrink:0; display:inline-flex; align-items:center; gap:7px; padding:9px 16px; background:var(--accent); color:var(--accent-contrast); font-weight:600; font-size:13.5px; text-decoration:none; border:1.5px solid transparent;}
+  .dl-btn:hover{background:var(--accent-strong);}
+
+  footer{padding-block:26px; border-top:1px solid var(--rule); display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-faint);}
+  footer a{text-decoration:none;}
+  footer a:hover{color:var(--ink-soft);}
+  .contact{font-family:'IBM Plex Mono',monospace;}
+
+  @media (max-width:600px){
+    .dl-row{flex-direction:column; align-items:flex-start;}
+    .dl-btn{width:100%; justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="wrap">
+    <header>
+      <div class="nav">
+        <a class="brand" href="../index.html" style="text-decoration:none; color:inherit;">
+          <span class="brand-mark" aria-hidden="true">&gt;1</span>
+          <span><span class="brand-word">NextOne</span><div class="brand-tag">תמיכה</div></span>
+        </a>
+        <a class="brand-tag" href="../index.html" style="text-decoration:none;">→ חזרה לדף הבית</a>
+      </div>
+    </header>
+
+    <section class="hero" style="border-top:none;">
+      <h1>קבצים להתקנה</h1>
+      <p>לתמיכה מרחוק, גיבוי ענן וכלי עזר. לוחצים על "הורדה" ומריצים את הקובץ שמתקבל.</p>
+    </section>
+
+    <section>
+      <div class="kicker">תמיכה מרחוק</div>
+      <div class="dl-list">
+        <div class="dl-row">
+          <div><div class="dl-name">TeamViewer QS</div><div class="dl-desc">גרסה חד-פעמית לתמיכה מרחוק — לא דורשת התקנה, נסגרת אוטומטית בסיום השיחה.</div></div>
+          <a class="dl-btn" href="https://download.teamviewer.com/download/TeamViewerQS.exe">הורדה</a>
+        </div>
+        <div class="dl-row">
+          <div><div class="dl-name">TeamViewer 15 FULL</div><div class="dl-desc">התקנה מלאה לשימוש קבוע, כולל אפשרות גישה גם כשאתה לא ליד המחשב.</div></div>
+          <a class="dl-btn" href="https://download.teamviewer.com/download/TeamViewer_Setup_x64.exe">הורדה</a>
+        </div>
+        <div class="dl-row">
+          <div><div class="dl-name">TeamViewer 15 Host</div><div class="dl-desc">מיועד להתקנה על מחשב או שרת שרוצים להתחבר אליו מרחוק בכל עת.</div></div>
+          <a class="dl-btn" href="https://download.teamviewer.com/download/TeamViewer_Host_Setup.exe">הורדה</a>
+        </div>
+        <div class="dl-row">
+          <div><div class="dl-name">AnyDesk</div><div class="dl-desc">חלופה ל-TeamViewer לתמיכה מרחוק חד-פעמית.</div></div>
+          <a class="dl-btn" href="https://download.anydesk.com/AnyDesk.exe">הורדה</a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="kicker">גיבוי</div>
+      <div class="dl-list">
+        <div class="dl-row">
+          <div><div class="dl-name">גיבוי ענן לעסקים – רב משתמשים</div><div class="dl-desc">תוכנת הגיבוי לענן עבור כמה משתמשים במשרד.</div></div>
+          <a class="dl-btn" href="https://www.dropbox.com/s/qvr9lo58gsj8gss/obc-win.exe?dl=0">הורדה</a>
+        </div>
+        <div class="dl-row">
+          <div><div class="dl-name">iDrive BackUP</div><div class="dl-desc">פתרון גיבוי ענן חלופי.</div></div>
+          <a class="dl-btn" href="https://www.idrive.com/idrive/o/p/nextone/partner90">הורדה</a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="kicker">כלי עזר</div>
+      <div class="dl-list">
+        <div class="dl-row">
+          <div><div class="dl-name">Tree Size Free</div><div class="dl-desc">בדיקה מה תופס מקום בכונן — עוזר לאתר קבצים כבדים ולפנות שטח. מוריד מאתר היצרן (JAM Software).</div></div>
+          <a class="dl-btn" href="https://www.jam-software.com/treesize_free" target="_blank" rel="noopener">הורדה</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>NextOne</span>
+      <span class="contact"><bdi>support@next1.co.il</bdi></span>
+    </footer>
+  </div>
+</div>
+</body>
+</html>
