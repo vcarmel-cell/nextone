@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NextOne — מערכות בהתאמה אישית</title>
+<meta name="description" content="שש מערכות עסקיות בהתאמה אישית שנבנו כדי לפתור תהליך עבודה ספציפי אחד — כוח אדם, חתימות, יומן, ארכיון, ניהול זמן ועדכונים לציבור.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&family=IBM+Plex+Sans+Hebrew:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1F3F5;
+    --panel:#FFFFFF;
+    --panel-2:#F7F8F9;
+    --ink:#14181D;
+    --ink-soft:#4B535C;
+    --ink-faint:#8A929B;
+    --rule:#D8DCE1;
+    --accent:#B9860B;
+    --accent-strong:#96690A;
+    --accent-contrast:#14181D;
+    --accent-bg:#F3E7C9;
+    --shadow: 0 1px 0 rgba(20,24,29,0.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#14181D;
+      --panel:#1B2027;
+      --panel-2:#20262D;
+      --ink:#E9ECEF;
+      --ink-soft:#A7AFB8;
+      --ink-faint:#6B7480;
+      --rule:#2B323A;
+      --accent:#DCA824;
+      --accent-strong:#EEBD40;
+      --accent-contrast:#14181D;
+      --accent-bg:#3A2E12;
+      --shadow: 0 1px 0 rgba(0,0,0,0.4);
+    }
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans Hebrew', Arial, sans-serif;}
+
+  .page{direction:rtl; text-align:right; padding-inline:20px;}
+  .wrap{max-width:1040px; margin:0 auto;}
+  bdi{unicode-bidi:isolate; font-family:'IBM Plex Mono', monospace;}
+  img{max-width:100%;}
+
+  h1,h2,h3{font-family:'Rubik', Arial, sans-serif; font-weight:800; text-wrap:balance; margin:0;}
+  p{margin:0; line-height:1.7;}
+  a{color:inherit;}
+
+  /* header */
+  header{padding-block:22px; border-bottom:1px solid var(--rule);}
+  .nav{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:center; gap:11px;}
+  .brand-mark{width:38px; height:38px; border:2px solid var(--accent); color:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:14px;}
+  .brand-word{font-family:'Rubik',sans-serif; font-weight:900; font-size:19px; letter-spacing:-.01em;}
+  .brand-tag{font-size:11px; color:var(--ink-faint); margin-top:1px;}
+  .nav-links{display:flex; gap:26px; font-size:14px; color:var(--ink-soft); font-weight:500;}
+  .nav-links a{text-decoration:none;}
+  .nav-links a:hover{color:var(--ink);}
+  a:focus-visible, button:focus-visible, input:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+
+  .btn{display:inline-flex; align-items:center; gap:8px; padding:12px 20px; font-family:'IBM Plex Sans Hebrew',sans-serif; font-weight:600; font-size:14.5px; text-decoration:none; border:1.5px solid transparent; cursor:pointer;}
+  .btn-primary{background:var(--accent); color:var(--accent-contrast);}
+  .btn-primary:hover{background:var(--accent-strong);}
+  .btn-ghost{border-color:var(--rule); color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--ink-soft);}
+  .btn-sm{padding:8px 14px; font-size:13px;}
+
+  /* hero */
+  .hero{padding-block:60px 46px; border-bottom:1px solid var(--rule);}
+  .hero h1{font-size:clamp(28px,4.4vw,44px); line-height:1.18; max-width:20ch;}
+  .hero .lede{margin-top:20px; font-size:16.5px; color:var(--ink-soft); max-width:66ch;}
+  .hero-ctas{display:flex; gap:12px; margin-top:30px; flex-wrap:wrap;}
+
+  /* section shell */
+  section{padding-block:52px;}
+  .kicker{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-faint); letter-spacing:.06em; margin-bottom:10px;}
+  .section-head h2{font-size:clamp(22px,3vw,28px); max-width:26ch;}
+  .section-head p{margin-top:10px; color:var(--ink-soft); max-width:60ch; font-size:15px;}
+
+  /* projects grid */
+  #work{border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);}
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); margin-top:32px;}
+  .plate{background:var(--panel); padding:22px 20px; display:flex; flex-direction:column; gap:12px;}
+  .plate-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.03em; color:var(--ink-faint); text-transform:uppercase;}
+  .plate-status{padding:2px 7px; border:1px solid var(--rule); white-space:nowrap;}
+  .plate h3{font-size:17px; font-weight:700;}
+  .plate p.desc{font-size:13.6px; color:var(--ink-soft); flex:1;}
+  .plate .specs{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); border-top:1px solid var(--rule); padding-top:10px;}
+  .plate .visit{font-size:13px; font-weight:600; color:var(--accent-strong); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .plate .visit:hover{text-decoration:underline;}
+
+  /* process */
+  .steps{margin-top:32px; display:grid; gap:0;}
+  .step{display:grid; grid-template-columns:56px 1fr; gap:20px; padding-block:20px; border-top:1px solid var(--rule);}
+  .step:last-child{border-bottom:1px solid var(--rule);}
+  .step-num{font-family:'IBM Plex Mono',monospace; font-size:22px; color:var(--ink-faint); font-weight:500;}
+  .step h3{font-size:16px; font-weight:700; margin-bottom:5px;}
+  .step p{color:var(--ink-soft); font-size:14.5px; max-width:60ch;}
+
+  /* cta band */
+  .cta-band{background:var(--accent-bg); border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); text-align:center;}
+  .cta-band h2{font-size:clamp(22px,3.2vw,30px); max-width:22ch; margin:0 auto;}
+  .cta-band p{margin-top:12px; color:var(--ink-soft); font-size:15px; max-width:48ch; margin-inline:auto;}
+  .cta-band .hero-ctas{justify-content:center; margin-top:24px;}
+
+  footer{padding-block:26px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-faint);}
+  footer .legal-links{display:flex; gap:16px;}
+  footer .legal-links a{text-decoration:none;}
+  footer .legal-links a:hover{color:var(--ink-soft);}
+  footer .contact{font-family:'IBM Plex Mono',monospace;}
+
+  @media (max-width:820px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:600px){
+    .grid{grid-template-columns:1fr;}
+    .nav-links{display:none;}
+    footer{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="wrap">
+    <header>
+      <div class="nav">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">&gt;1</span>
+          <span><span class="brand-word">NextOne</span><div class="brand-tag">פיתוח מערכות בהתאמה אישית</div></span>
+        </div>
+        <nav class="nav-links">
+          <a href="#work">מערכות</a>
+          <a href="#process">איך זה עובד</a>
+        </nav>
+        <a class="btn btn-primary btn-sm" href="mailto:support@next1.co.il?subject=%D7%A9%D7%99%D7%97%D7%AA%20%D7%94%D7%99%D7%9B%D7%A8%D7%95%D7%AA">לשיחת היכרות</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1>מערכות שנבנות סביב תהליך עבודה אחד — לא סביב תבנית כללית</h1>
+      <p class="lede">שש דוגמאות מהעבודה האחרונה: ניהול כוח אדם, חתימה דיגיטלית על מסמכים, יומן פגישות משותף, איתור קופסאות ארכיון, ניהול זמן והכנסות, ועדכונים תקופתיים לציבור. אם יש לך תהליך שגוזל זמן בגיליונות, בקבוצות וואטסאפ או בניירת פיזית — כנראה שאפשר לבנות לו כלי דומה.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="mailto:support@next1.co.il?subject=%D7%A9%D7%99%D7%97%D7%AA%20%D7%94%D7%99%D7%9B%D7%A8%D7%95%D7%AA">
+          לשיחת היכרות
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#work">למערכות שנבנו</a>
+      </div>
+    </section>
+
+    <section id="work">
+      <div class="kicker">שש דוגמאות</div>
+      <div class="section-head">
+        <h2>מה שנבנה עד עכשיו</h2>
+        <p>כל אחת מהמערכות האלה פותרת בעיה תפעולית אחת, לא "עוד כלי כללי". לחיצה על שם המערכת פותחת אותה בפועל.</p>
+      </div>
+
+      <div class="grid">
+        <div class="plate">
+          <div class="plate-top"><span>כוח אדם</span><span class="plate-status">בשימוש אצל לקוח</span></div>
+          <h3>HR-Manager</h3>
+          <p class="desc">תיקי עובדים, הכשרות ותזכורות, ובקשות חתימה דיגיטלית על מסמכי כוח אדם — בפורטל אחד למנהל ולעובד.</p>
+          <div class="specs">ניהול עובדים · הכשרות · חתימה דיגיטלית</div>
+          <a class="visit" href="https://hr.next1.co.il/" target="_blank" rel="noopener">לצפייה בפועל ←</a>
+        </div>
+
+        <div class="plate">
+          <div class="plate-top"><span>מסמכים</span><span class="plate-status">חי</span></div>
+          <h3>PDFSign</h3>
+          <p class="desc">מילוי וחתימה דיגיטלית על קובצי PDF, כולל מצב רב-משתמשים וכמה חותמים על אותו מסמך.</p>
+          <div class="specs">PDF · ריבוי חותמים · ללא הדפסה</div>
+          <a class="visit" href="https://vcarmel-cell.github.io/pdfsign/" target="_blank" rel="noopener">לצפייה בפועל ←</a>
+        </div>
+
+        <div class="plate">
+          <div class="plate-top"><span>תיאום פגישות</span><span class="plate-status">דוגמה חיה</span></div>
+          <h3>יומן פגישות משותף</h3>
+          <p class="desc">יומן פגישות למספר עובדים או חדרים במקביל, עם פרטי לקוח לכל פגישה וסל מיחזור לפעולות שבוטלו בטעות.</p>
+          <div class="specs">ריבוי יומנים · פרטי לקוח · סל מיחזור</div>
+          <a class="visit" href="https://vcarmel-cell.github.io/calendar-demo/" target="_blank" rel="noopener">לצפייה בפועל ←</a>
+        </div>
+
+        <div class="plate">
+          <div class="plate-top"><span>ניהול זמן</span><span class="plate-status">חי</span></div>
+          <h3>TimeLedger</h3>
+          <p class="desc">רישום משימות יומי שהופך אוטומטית לדוח הכנסות והוצאות חודשי — בלי טבלת אקסל שצריך לעדכן ידנית.</p>
+          <div class="specs">יומן משימות · סיכום חודשי</div>
+          <a class="visit" href="https://vcarmel-cell.github.io/TimeLedger/" target="_blank" rel="noopener">לצפייה בפועל ←</a>
+        </div>
+
+        <div class="plate">
+          <div class="plate-top"><span>ארכיון פיזי</span><span class="plate-status">חי</span></div>
+          <h3>ArchiveBoxes</h3>
+          <p class="desc">איתור קופסת ארכיון לפי שם לקוח ומספר קופסה, מול קובץ Excel שמעלים. עובד גם בלי אינטרנט, בלי שרת מאחורה.</p>
+          <div class="specs">PWA אופליין · חיפוש מול Excel</div>
+          <a class="visit" href="https://vcarmel-cell.github.io/archive-boxes/" target="_blank" rel="noopener">לצפייה בפועל ←</a>
+        </div>
+
+        <div class="plate">
+          <div class="plate-top"><span>תקשורת תקופתית</span><span class="plate-status">מנוי חודשי</span></div>
+          <h3>סיכום תקופתי</h3>
+          <p class="desc">עדכון מסודר לציבור על כל מה שקרה בתקופה — אוטומטית בקצב קבוע, או בלחיצת כפתור.</p>
+          <div class="specs">אוטומטי / ידני · מנוי חודשי</div>
+          <a class="visit" href="https://manager-digest.next1.co.il/" target="_blank" rel="noopener">לצפייה בפועל ←</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="process">
+      <div class="kicker">תהליך העבודה</div>
+      <div class="section-head">
+        <h2>איך זה מתחיל</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"><bdi>01</bdi></div>
+          <div><h3>שיחת היכרות</h3><p>מבינים את התהליך הקיים כמו שהוא היום, ואיפה בדיוק הוא נתקע או גוזל זמן.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num"><bdi>02</bdi></div>
+          <div><h3>גרסה עובדת, לא מוקאפ</h3><p>בנייה מהירה של גרסה ראשונה שאפשר לבדוק בפועל, על נתונים אמיתיים — לא הדמיה.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num"><bdi>03</bdi></div>
+          <div><h3>מסירה ותמיכה</h3><p>המערכת עוברת לשימוש בפועל, עם תמיכה שוטפת אחרי המסירה כשמשהו צריך להשתנות.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <h2>יש לך תהליך שגוזל זמן?</h2>
+      <p>ספר לי עליו בשיחה קצרה — נבין ביחד אם יש טעם לבנות לו כלי, ואיך זה יכול להיראות.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="mailto:support@next1.co.il?subject=%D7%A9%D7%99%D7%97%D7%AA%20%D7%94%D7%99%D7%9B%D7%A8%D7%95%D7%AA">לשיחת היכרות</a>
+      </div>
+    </section>
+
+    <footer>
+      <span>NextOne</span>
+      <nav class="legal-links">
+        <a href="privacy.html">פרטיות</a>
+        <a href="terms.html">תנאי שימוש</a>
+        <a href="accessibility.html">נגישות</a>
+      </nav>
+      <span class="contact"><bdi>support@next1.co.il</bdi></span>
+    </footer>
+  </div>
+</div>
+</body>
+</html>
