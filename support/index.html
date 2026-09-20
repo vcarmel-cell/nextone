@@ -31,11 +31,11 @@
   p{margin:0; line-height:1.7;}
   a{color:inherit;}
 
-  header{padding-block:22px; border-bottom:1px solid var(--rule);}
+  header{padding-block:10px; border-bottom:1px solid var(--rule);}
   .nav{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
   .brand{display:flex; align-items:center; gap:11px;}
-  .brand-mark{width:38px; height:38px; border:2px solid var(--accent); color:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:14px;}
-  .brand-word{font-family:'Rubik',sans-serif; font-weight:900; font-size:19px; letter-spacing:-.01em;}
+  .brand-logo{display:block; height:84px; width:auto;}
+  @media (prefers-color-scheme: dark){ .brand-logo{background:#F1F3F5; padding:4px 10px;} }
   .brand-tag{font-size:11px; color:var(--ink-faint); margin-top:1px;}
   a:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
 
@@ -71,8 +71,8 @@
     <header>
       <div class="nav">
         <a class="brand" href="../index.html" style="text-decoration:none; color:inherit;">
-          <span class="brand-mark" aria-hidden="true">&gt;1</span>
-          <span><span class="brand-word">NextOne</span><div class="brand-tag">תמיכה</div></span>
+          <img class="brand-logo" src="../logo.png" alt="NextOne" width="112" height="84">
+          <span class="brand-tag">תמיכה</span>
         </a>
         <a class="brand-tag" href="../index.html" style="text-decoration:none;">→ חזרה לדף הבית</a>
       </div>
