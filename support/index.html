@@ -11,15 +11,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&family=IBM+Plex+Sans+Hebrew:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#F1F3F5; --panel:#FFFFFF; --panel-2:#F7F8F9;
-    --ink:#14181D; --ink-soft:#4B535C; --ink-faint:#8A929B;
-    --rule:#D8DCE1; --accent:#B9860B; --accent-strong:#96690A; --accent-contrast:#14181D;
+    --paper:#EFF2F6; --panel:#FFFFFF; --panel-2:#F6F8FB;
+    --ink:#10233F; --ink-soft:#44546C; --ink-faint:#5E6E88;
+    --rule:#D3DBE6; --accent:#126EB1; --accent-strong:#0D5A93; --accent-contrast:#FFFFFF; --accent-bg:#DCE9F5;
+    --shadow: 0 1px 0 rgba(16,35,63,0.05);
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --paper:#14181D; --panel:#1B2027; --panel-2:#20262D;
-      --ink:#E9ECEF; --ink-soft:#A7AFB8; --ink-faint:#6B7480;
-      --rule:#2B323A; --accent:#DCA824; --accent-strong:#EEBD40; --accent-contrast:#14181D;
+      --paper:#0C1626; --panel:#132139; --panel-2:#182A45;
+      --ink:#E6EDF6; --ink-soft:#A6B4C7; --ink-faint:#8090A8;
+      --rule:#22334F; --accent:#4FA3E0; --accent-strong:#7DBBEB; --accent-contrast:#08131F; --accent-bg:#132A4A;
+      --shadow: 0 1px 0 rgba(0,0,0,0.4);
     }
   }
   *{box-sizing:border-box;}
@@ -35,7 +37,7 @@
   .nav{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
   .brand{display:flex; align-items:center; gap:11px;}
   .brand-logo{display:block; height:84px; width:auto;}
-  @media (prefers-color-scheme: dark){ .brand-logo{background:#F1F3F5; padding:4px 10px;} }
+  @media (prefers-color-scheme: dark){ .brand-logo{background:#EFF2F6; padding:4px 10px;} }
   .brand-tag{font-size:11px; color:var(--ink-faint); margin-top:1px;}
   a:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
 
