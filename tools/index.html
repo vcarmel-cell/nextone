@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בדיקות רשת — NextOne</title>
+<meta name="description" content="בדיקת זמינות אתר, בדיקת פורטים פתוחים, בדיקת מהירות גלישה, האתרים הגדולים בעברית וכלים להורדה לתמיכה טכנית.">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&family=IBM+Plex+Sans+Hebrew:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFF2F6; --panel:#FFFFFF; --panel-2:#F6F8FB;
+    --ink:#10233F; --ink-soft:#44546C; --ink-faint:#5E6E88;
+    --rule:#D3DBE6; --accent:#126EB1; --accent-strong:#0D5A93; --accent-contrast:#FFFFFF; --accent-bg:#DCE9F5;
+    --ok:#1E7A46; --ok-bg:#DDF1E4; --bad:#B42318; --bad-bg:#FBE3E0; --warn:#8A5A00; --warn-bg:#FBEFD5;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#0C1626; --panel:#132139; --panel-2:#182A45;
+      --ink:#E6EDF6; --ink-soft:#A6B4C7; --ink-faint:#8090A8;
+      --rule:#22334F; --accent:#4FA3E0; --accent-strong:#7DBBEB; --accent-contrast:#08131F; --accent-bg:#132A4A;
+      --ok:#5CC98A; --ok-bg:#12321F; --bad:#F2877C; --bad-bg:#3A1A18; --warn:#E8B85A; --warn-bg:#352A12;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  body{background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans Hebrew', Arial, sans-serif;}
+  .page{direction:rtl; text-align:right; padding-inline:16px;}
+  .wrap{max-width:900px; margin:0 auto;}
+  h1,h2{font-family:'Rubik', Arial, sans-serif; font-weight:800; text-wrap:balance; margin:0;}
+  p{margin:0; line-height:1.7;}
+  a{color:inherit;}
+  bdi, .mono{font-family:'IBM Plex Mono', monospace; unicode-bidi:isolate;}
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+  .skip{position:absolute; top:-40px; right:16px; background:var(--accent); color:var(--accent-contrast); padding:8px 12px; z-index:10;}
+  .skip:focus{top:8px;}
+
+  header{padding-block:10px; border-bottom:1px solid var(--rule);}
+  .nav{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:center; gap:11px; text-decoration:none; color:inherit;}
+  .brand-logo{display:block; height:84px; width:auto;}
+  @media (prefers-color-scheme: dark){ .brand-logo{background:#EFF2F6; padding:4px 10px;} }
+  .brand-tag{font-size:11px; color:var(--ink-faint); margin-top:1px; text-decoration:none;}
+  a:focus-visible, button:focus-visible, input:focus-visible, label:focus-within{outline:2px solid var(--accent); outline-offset:3px;}
+
+  .hero{padding-block:40px 24px;}
+  .hero h1{font-size:clamp(24px,4vw,34px); line-height:1.2;}
+  .hero p{margin-top:12px; color:var(--ink-soft); font-size:15px; max-width:62ch;}
+  .toc{display:flex; flex-wrap:wrap; gap:0; margin-top:24px; border:1px solid var(--rule); background:var(--panel);}
+  .toc a{flex:1 1 auto; padding:10px 14px; font-size:13.5px; text-decoration:none; color:var(--ink-soft); border-inline-start:1px solid var(--rule); white-space:nowrap;}
+  .toc a:first-child{border-inline-start:none;}
+  .toc a:hover{color:var(--ink); background:var(--panel-2);}
+  .toc .n{font-family:'IBM Plex Mono',monospace; color:var(--accent); margin-inline-end:6px;}
+
+  section.tool{padding-block:34px; border-top:1px solid var(--rule); scroll-margin-top:12px;}
+  .kicker{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-faint); letter-spacing:.06em; margin-bottom:8px;}
+  section.tool h2{font-size:clamp(20px,3vw,25px);}
+  .intro{margin-top:8px; color:var(--ink-soft); font-size:14.5px; max-width:64ch;}
+
+  .box{margin-top:18px; background:var(--panel); border:1px solid var(--rule); padding:18px;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;}
+  .field{display:flex; flex-direction:column; gap:6px; flex:1 1 240px; min-width:0;}
+  .field label{font-size:13px; font-weight:600; color:var(--ink-soft);}
+  input[type=text]{width:100%; font:inherit; font-size:15px; padding:10px 12px; border:1.5px solid var(--rule); background:var(--paper); color:var(--ink); border-radius:0;}
+  input[type=text]:focus{border-color:var(--accent); outline:none;}
+  input.ltr{direction:ltr; text-align:left; font-family:'IBM Plex Mono',monospace; font-size:14px;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 20px; font-family:inherit; font-weight:600; font-size:14px; text-decoration:none; border:1.5px solid transparent; cursor:pointer; border-radius:0; background:var(--accent); color:var(--accent-contrast);}
+  .btn:hover{background:var(--accent-strong);}
+  .btn:disabled{opacity:.55; cursor:default;}
+  .btn-ghost{background:transparent; border-color:var(--rule); color:var(--ink);}
+  .btn-ghost:hover{background:transparent; border-color:var(--ink-soft);}
+  .btn-sm{padding:7px 12px; font-size:12.5px;}
+  .hint{font-size:12.5px; color:var(--ink-faint); margin-top:10px; line-height:1.6;}
+  .err{margin-top:12px; padding:10px 12px; background:var(--bad-bg); color:var(--bad); font-size:13.5px;}
+
+  .badge{display:inline-block; padding:2px 8px; font-size:12px; font-weight:600; white-space:nowrap;}
+  .b-ok{background:var(--ok-bg); color:var(--ok);}
+  .b-bad{background:var(--bad-bg); color:var(--bad);}
+  .b-warn{background:var(--warn-bg); color:var(--warn);}
+  .b-idle{background:var(--panel-2); color:var(--ink-faint); border:1px solid var(--rule);}
+
+  /* site check result */
+  .verdict{margin-top:16px; border:1px solid var(--rule); background:var(--panel-2); padding:16px;}
+  .verdict-title{font-family:'Rubik',Arial,sans-serif; font-weight:700; font-size:18px;}
+  .verdict-title.ok{color:var(--ok);} .verdict-title.bad{color:var(--bad);} .verdict-title.warn{color:var(--warn);}
+  .facts{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); margin-top:12px;}
+  .fact{background:var(--panel); padding:10px 12px;}
+  .fact .k{font-size:11.5px; color:var(--ink-faint);}
+  .fact .v{font-size:14px; margin-top:3px; overflow-wrap:anywhere;}
+
+  /* ports */
+  .presets{display:flex; flex-wrap:wrap; gap:6px; margin-top:14px;}
+  .chip{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid var(--rule); background:var(--paper); font-size:12.5px; cursor:pointer; user-select:none;}
+  .chip input{margin:0; accent-color:var(--accent);}
+  .chip:has(input:checked){border-color:var(--accent); background:var(--accent-bg);}
+  .chip .p{font-family:'IBM Plex Mono',monospace; font-weight:600;}
+  .chip .s{color:var(--ink-soft);}
+  .preset-actions{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  table{width:100%; border-collapse:collapse; margin-top:16px; font-size:14px;}
+  th,td{padding:9px 12px; border-bottom:1px solid var(--rule); text-align:right;}
+  th{font-size:12px; color:var(--ink-faint); font-weight:600; background:var(--panel-2);}
+  td.num{font-family:'IBM Plex Mono',monospace;}
+
+  /* speed */
+  .gauges{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule);}
+  .gauge{background:var(--panel); padding:18px 16px;}
+  .gauge .k{font-size:12.5px; color:var(--ink-soft); font-weight:600;}
+  .gauge .v{font-family:'IBM Plex Mono',monospace; font-size:clamp(26px,5vw,40px); font-weight:600; margin-top:6px; direction:ltr; text-align:right; font-variant-numeric:tabular-nums;}
+  .gauge .u{font-size:12px; color:var(--ink-faint); margin-top:2px;}
+  .gauge.active{box-shadow:inset 0 -3px 0 var(--accent);}
+  .bar{height:4px; background:var(--panel-2); margin-top:14px; overflow:hidden;}
+  .bar > div{height:100%; width:0; background:var(--accent); transition:width .2s linear;}
+  .speed-meta{display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; font-size:12.5px; color:var(--ink-faint);}
+
+  /* top sites */
+  .cat{margin-top:20px;}
+  .cat-name{font-size:13px; font-weight:700; color:var(--ink-soft); margin-bottom:8px;}
+  .sites{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule);}
+  .site{background:var(--panel); padding:11px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .site a{text-decoration:none; font-weight:600; font-size:14px; display:flex; align-items:center; gap:10px; min-width:0;}
+  .site .fav{flex-shrink:0; width:28px; height:28px; display:grid; place-items:center; background:#FFFFFF; border:1px solid var(--rule); font-family:'Rubik',Arial,sans-serif; font-size:13px; font-weight:700; color:#44546C;}
+  .site .fav img{width:20px; height:20px; display:block;}
+  .site a:hover{color:var(--accent);}
+  .site .dom{display:block; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-faint); font-weight:400; direction:ltr; text-align:right;}
+
+  /* downloads */
+  .dl-list{display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule);}
+  .dl-row{background:var(--panel); padding:13px 16px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+  .dl-name{font-weight:700; font-size:14.5px;}
+  .dl-desc{color:var(--ink-soft); font-size:13px; margin-top:2px;}
+  .dl-src{font-size:11.5px; color:var(--ink-faint); margin-top:2px;}
+
+  footer{padding-block:26px; border-top:1px solid var(--rule); margin-top:10px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-faint);}
+  footer .legal-links{display:flex; gap:16px;}
+  footer a{text-decoration:none;}
+  footer a:hover{color:var(--ink-soft);}
+
+  @media (max-width:640px){
+    .gauges{grid-template-columns:1fr;}
+    .dl-row{flex-direction:column; align-items:flex-start;}
+    .dl-row .btn{width:100%;}
+    .row .btn{width:100%;}
+    .toc a{flex:1 1 45%; border-inline-start:none; border-top:1px solid var(--rule);}
+    .toc a:first-child{border-top:none;}
+    th:nth-child(4), td:nth-child(4){display:none;}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">דילוג לתוכן</a>
+
+<div class="page">
+  <div class="wrap">
+    <header>
+      <div class="nav">
+        <a class="brand" href="../index.html">
+          <img class="brand-logo" src="../logo.png" alt="NextOne — לדף הבית" width="112" height="84">
+          <span class="brand-tag">בדיקות רשת</span>
+        </a>
+        <a class="brand-tag" href="../support/">קבצי תמיכה מרחוק ←</a>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="hero">
+        <h1>התקלה אצלך או אצלם? בודקים כאן.</h1>
+        <p>חמש בדיקות שאנחנו עושים בתחילת כל קריאת שירות: האם האתר באמת למטה, האם הפורט פתוח, מה מהירות הגלישה בפועל — ואיפה מורידים את כלי העזר.</p>
+        <nav class="toc" aria-label="ניווט בין הכלים">
+          <a href="#site"><span class="n">01</span>זמינות אתר</a>
+          <a href="#ports"><span class="n">02</span>פורטים פתוחים</a>
+          <a href="#speed"><span class="n">03</span>מהירות גלישה</a>
+          <a href="#top"><span class="n">04</span>אתרים מובילים</a>
+          <a href="#downloads"><span class="n">05</span>כלים להורדה</a>
+        </nav>
+      </div>
+
+      <!-- 1. Site availability -->
+      <section class="tool" id="site" aria-labelledby="site-h">
+        <div class="kicker">01</div>
+        <h2 id="site-h">האם האתר זמין?</h2>
+        <p class="intro">האתר נבדק משני מקומות: מהשרת שלנו ומהמחשב שלך. אם הוא עולה אצלנו ולא אצלך — הבעיה כנראה ברשת שלך, בספק האינטרנט או בחומת האש.</p>
+        <div class="box">
+          <form class="row" id="site-form" novalidate>
+            <div class="field">
+              <label for="site-url">כתובת האתר</label>
+              <input type="text" class="ltr" id="site-url" placeholder="example.co.il" autocomplete="url" inputmode="url" spellcheck="false" required>
+            </div>
+            <button class="btn" type="submit" id="site-btn">בדיקה</button>
+          </form>
+          <div id="site-out" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- 2. Ports -->
+      <section class="tool" id="ports" aria-labelledby="ports-h">
+        <div class="kicker">02</div>
+        <h2 id="ports-h">אילו פורטים פתוחים?</h2>
+        <p class="intro">בודק מהאינטרנט אם אפשר להתחבר לפורט בכתובת IP או בשם שרת — שימושי לבדיקת הפניית פורטים בראוטר, גישה מרחוק (RDP) או שרת מצלמות.</p>
+        <div class="box">
+          <form id="ports-form" novalidate>
+            <div class="row">
+              <div class="field">
+                <label for="ports-host">כתובת IP או שם שרת</label>
+                <input type="text" class="ltr" id="ports-host" placeholder="203.0.113.10" spellcheck="false" required>
+              </div>
+              <button class="btn btn-ghost" type="button" id="my-ip">הכתובת שלי</button>
+            </div>
+            <fieldset style="border:none; padding:0; margin:0;">
+              <legend class="sr-only">פורטים נפוצים</legend>
+              <div class="presets" id="presets"></div>
+            </fieldset>
+            <div class="preset-actions">
+              <button class="btn btn-ghost btn-sm" type="button" id="sel-all">סימון הכל</button>
+              <button class="btn btn-ghost btn-sm" type="button" id="sel-none">ניקוי</button>
+            </div>
+            <div class="row" style="margin-top:14px;">
+              <div class="field">
+                <label for="ports-custom">פורטים נוספים (מופרדים בפסיק)</label>
+                <input type="text" class="ltr" id="ports-custom" placeholder="8000, 9090, 37777" spellcheck="false">
+              </div>
+              <button class="btn" type="submit" id="ports-btn">בדיקת פורטים</button>
+            </div>
+          </form>
+          <p class="hint">עד 20 פורטים בבדיקה. פורט 25 (SMTP) לא נבדק — ספק התשתית חוסם אותו. כתובות פנימיות כמו 192.168.x.x לא נגישות מהאינטרנט ולכן לא ניתנות לבדיקה כאן.</p>
+          <div id="ports-out" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- 3. Speed -->
+      <section class="tool" id="speed" aria-labelledby="speed-h">
+        <div class="kicker">03</div>
+        <h2 id="speed-h">מהירות הורדה והעלאה</h2>
+        <p class="intro">הבדיקה מורידה ומעלה נתונים לשרת קרוב של Cloudflare במשך כמה שניות לכל כיוון. לתוצאה מדויקת — עדיף חיבור בכבל ובלי הורדות ברקע.</p>
+        <div class="box">
+          <div class="gauges">
+            <div class="gauge" id="g-ping"><div class="k">זמן תגובה</div><div class="v" id="v-ping">—</div><div class="u">מילישניות</div></div>
+            <div class="gauge" id="g-down"><div class="k">הורדה</div><div class="v" id="v-down">—</div><div class="u">מגה-ביט לשנייה</div></div>
+            <div class="gauge" id="g-up"><div class="k">העלאה</div><div class="v" id="v-up">—</div><div class="u">מגה-ביט לשנייה</div></div>
+          </div>
+          <div class="bar" aria-hidden="true"><div id="speed-bar"></div></div>
+          <div class="row" style="margin-top:16px; align-items:center;">
+            <button class="btn" type="button" id="speed-btn">התחלת בדיקה</button>
+            <span id="speed-status" class="hint" style="margin:0;" aria-live="polite"></span>
+          </div>
+          <div class="speed-meta" id="speed-meta"></div>
+        </div>
+      </section>
+
+      <!-- 4. Top Hebrew sites -->
+      <section class="tool" id="top" aria-labelledby="top-h">
+        <div class="kicker">04</div>
+        <h2 id="top-h">האתרים הגדולים בעברית</h2>
+        <p class="intro">האתרים בעברית עם הכי הרבה תנועה בישראל, לפי תחום. הרשימה מבוססת על דירוגי תנועה ציבוריים ומתעדכנת מדי פעם; הסדר בתוך כל תחום משוער. לחיצה על "בדיקת כולם" מראה אילו מהם זמינים כרגע — שימושי כשרוצים לדעת אם יש תקלה כללית.</p>
+        <div class="row" style="margin-top:16px; align-items:center;">
+          <button class="btn" type="button" id="top-btn">בדיקת זמינות לכולם</button>
+          <span id="top-status" class="hint" style="margin:0;" aria-live="polite"></span>
+        </div>
+        <div id="top-list"></div>
+      </section>
+
+      <!-- 5. Downloads -->
+      <section class="tool" id="downloads" aria-labelledby="dl-h">
+        <div class="kicker">05</div>
+        <h2 id="dl-h">כלים להורדה לתמיכה טכנית</h2>
+        <p class="intro">כל הקישורים מובילים לדף ההורדה הרשמי של היצרן. כלים שמשמשים אותנו בשטח לאבחון, ניקוי ותיקון.</p>
+        <div id="dl-list"></div>
+      </section>
+    </main>
+
+    <footer>
+      <span>NextOne · <bdi>support@next1.co.il</bdi></span>
+      <span class="legal-links">
+        <a href="../privacy.html">פרטיות</a>
+        <a href="../terms.html">תנאי שימוש</a>
+        <a href="../accessibility.html">נגישות</a>
+      </span>
+    </footer>
+  </div>
+</div>
+
+<script>
+const API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:'
+  ? 'http://localhost:8787'
+  : 'https://nextone-nettools.vcarmel-cell.workers.dev';
+const SPEED = 'https://speed.cloudflare.com';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function api(path, timeoutMs = 20000) {
+  const res = await fetch(API + path, { signal: AbortSignal.timeout(timeoutMs) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'שגיאה בשרת הבדיקה');
+  return data;
+}
+
+function normalizeUrl(raw) {
+  const s = raw.trim();
+  if (!s) return null;
+  try { return new URL(/^https?:\/\//i.test(s) ? s : 'https://' + s); } catch { return null; }
+}
+
+// Reachability from the visitor's own browser. With no-cors the response is
+// opaque, so this only says "something answered", not the status code.
+async function browserProbe(url) {
+  if (url.protocol !== 'https:') return null;
+  const t = performance.now();
+  try {
+    await fetch(url.origin + '/favicon.ico?_=' + Date.now(), { mode: 'no-cors', cache: 'no-store', signal: AbortSignal.timeout(8000) });
+    return { ok: true, ms: Math.round(performance.now() - t) };
+  } catch { return { ok: false }; }
+}
+
+function siteVerdict(d) {
+  if (d.error && d.status == null) return { cls: 'bad', label: 'לא זמין', badge: 'b-bad' };
+  if (d.status >= 500) return { cls: 'bad', label: 'לא זמין', badge: 'b-bad' };
+  if (d.status === 403 || d.status === 429) return { cls: 'warn', label: 'זמין (חוסם בדיקות אוטומטיות)', badge: 'b-warn' };
+  if (d.status >= 400) return { cls: 'warn', label: 'השרת עונה, אבל הדף מחזיר שגיאה', badge: 'b-warn' };
+  return { cls: 'ok', label: 'זמין', badge: 'b-ok' };
+}
+
+function errText(e) {
+  if (!e) return '';
+  if (e === 'timeout') return 'השרת לא ענה תוך 10 שניות';
+  if (/dns|resolve|internal error|ENOTFOUND/i.test(e)) return 'שם האתר לא נמצא (DNS)';
+  return 'החיבור נכשל';
+}
+
+const STATUS_TEXT = {200:'תקין',301:'הפניה קבועה',302:'הפניה זמנית',403:'גישה נחסמה',404:'הדף לא נמצא',429:'יותר מדי בקשות',500:'שגיאת שרת',502:'שער שגוי',503:'השירות לא זמין',504:'פג זמן השער',520:'שגיאה לא ידועה (Cloudflare)',521:'השרת כבוי (Cloudflare)',522:'פג זמן החיבור (Cloudflare)',523:'השרת לא נגיש (Cloudflare)',525:'שגיאת SSL',526:'תעודת SSL לא תקינה',530:'שם האתר לא נמצא'};
+
+$('site-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const out = $('site-out'), btn = $('site-btn');
+  const url = normalizeUrl($('site-url').value);
+  if (!url || !url.hostname.includes('.')) { out.innerHTML = '<div class="err">יש להזין כתובת אתר, למשל ynet.co.il</div>'; return; }
+  btn.disabled = true; btn.textContent = 'בודק…';
+  out.innerHTML = '<p class="hint">בודק את <bdi>' + esc(url.hostname) + '</bdi>…</p>';
+  const [server, local] = await Promise.all([
+    api('/site?url=' + encodeURIComponent(url.href)).catch(err => ({ apiError: err.message })),
+    browserProbe(url),
+  ]);
+  btn.disabled = false; btn.textContent = 'בדיקה';
+
+  if (server.apiError) {
+    const l = local?.ok ? 'האתר עונה מהמחשב שלך.' : local ? 'האתר לא עונה גם מהמחשב שלך.' : '';
+    out.innerHTML = '<div class="err">שרת הבדיקה לא זמין כרגע. ' + esc(l) + '</div>';
+    return;
+  }
+  const v = siteVerdict(server);
+  let summary = '';
+  if (local) {
+    if (v.cls !== 'bad' && !local.ok) summary = 'האתר עובד, אבל לא נטען מהמחשב שלך — כדאי לבדוק את החיבור, ה-DNS, חומת האש או סינון אצל ספק האינטרנט.';
+    else if (v.cls === 'bad' && local.ok) summary = 'האתר עונה מהמחשב שלך אבל לא מהשרת שלנו — ייתכן שהוא חוסם גישה מחו"ל או שהתקלה חלקית.';
+    else if (v.cls === 'bad') summary = 'האתר לא עונה מאף מקום — סביר שהתקלה אצל האתר עצמו, לא אצלך.';
+    else summary = 'האתר עובד, וגם מהמחשב שלך.';
+  }
+  const status = server.status != null ? server.status + (STATUS_TEXT[server.status] ? ' · ' + STATUS_TEXT[server.status] : '') : errText(server.error);
+  const finalHost = server.finalUrl ? new URL(server.finalUrl).href : '';
+  out.innerHTML = `
+    <div class="verdict">
+      <div class="verdict-title ${v.cls}">${esc(v.label)}</div>
+      ${summary ? `<p style="margin-top:6px; font-size:14px; color:var(--ink-soft);">${esc(summary)}</p>` : ''}
+      <div class="facts">
+        <div class="fact"><div class="k">מהשרת שלנו</div><div class="v"><span class="badge ${v.badge}">${v.cls === 'bad' ? 'לא עונה' : 'עונה'}</span></div></div>
+        <div class="fact"><div class="k">מהמחשב שלך</div><div class="v">${local == null ? '<span class="badge b-idle">לא נבדק (http)</span>' : local.ok ? '<span class="badge b-ok">עונה</span>' : '<span class="badge b-bad">לא עונה</span>'}</div></div>
+        <div class="fact"><div class="k">קוד תשובה</div><div class="v"><bdi>${esc(status)}</bdi></div></div>
+        <div class="fact"><div class="k">זמן תגובה</div><div class="v"><bdi>${server.ms != null ? server.ms + ' ms' : '—'}</bdi></div></div>
+        ${finalHost && finalHost !== url.href ? `<div class="fact" style="grid-column:1/-1;"><div class="k">הופנה אל</div><div class="v"><bdi>${esc(finalHost)}</bdi></div></div>` : ''}
+      </div>
+    </div>`;
+});
+
+/* ---------- Ports ---------- */
+const PRESETS = [
+  [21,'FTP'],[22,'SSH'],[23,'Telnet'],[53,'DNS'],[80,'HTTP'],[110,'POP3'],[143,'IMAP'],[443,'HTTPS'],
+  [445,'SMB'],[465,'SMTPS'],[587,'SMTP הגשה'],[993,'IMAPS'],[995,'POP3S'],[1433,'SQL Server'],
+  [3306,'MySQL'],[3389,'RDP'],[5900,'VNC'],[8080,'HTTP חלופי'],[8443,'HTTPS חלופי'],[554,'RTSP מצלמות'],
+];
+const DEFAULT_ON = new Set([80,443,3389,22,21]);
+const SERVICE = Object.fromEntries(PRESETS);
+$('presets').innerHTML = PRESETS.map(([p, s]) =>
+  `<label class="chip"><input type="checkbox" value="${p}" ${DEFAULT_ON.has(p) ? 'checked' : ''}><span class="p">${p}</span><span class="s">${esc(s)}</span></label>`
+).join('');
+const boxes = () => [...$('presets').querySelectorAll('input')];
+$('sel-all').onclick = () => boxes().forEach(b => b.checked = true);
+$('sel-none').onclick = () => boxes().forEach(b => b.checked = false);
+
+$('my-ip').addEventListener('click', async () => {
+  const btn = $('my-ip'); btn.disabled = true;
+  try { const d = await api('/ip', 8000); $('ports-host').value = d.ip || ''; }
+  catch { $('ports-out').innerHTML = '<div class="err">לא הצלחנו לזהות את הכתובת שלך.</div>'; }
+  btn.disabled = false;
+});
+
+$('ports-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const out = $('ports-out'), btn = $('ports-btn');
+  const host = $('ports-host').value.trim().replace(/^https?:\/\//i, '').replace(/[\/:].*$/, '');
+  const custom = $('ports-custom').value.split(/[\s,]+/).filter(Boolean);
+  const bad = custom.filter(p => !/^\d+$/.test(p) || +p < 1 || +p > 65535);
+  const ports = [...new Set([...boxes().filter(b => b.checked).map(b => +b.value), ...custom.filter(p => !bad.includes(p)).map(Number)])];
+  if (!host) { out.innerHTML = '<div class="err">יש להזין כתובת IP או שם שרת.</div>'; return; }
+  if (bad.length) { out.innerHTML = '<div class="err">פורט לא תקין: <bdi>' + esc(bad.join(', ')) + '</bdi> (מספר בין 1 ל-65535)</div>'; return; }
+  if (!ports.length) { out.innerHTML = '<div class="err">יש לבחור לפחות פורט אחד.</div>'; return; }
+  if (ports.length > 20) { out.innerHTML = '<div class="err">נבחרו ' + ports.length + ' פורטים — אפשר עד 20 בבדיקה אחת.</div>'; return; }
+  btn.disabled = true; btn.textContent = 'בודק…';
+  out.innerHTML = '<p class="hint">בודק ' + ports.length + ' פורטים ב-<bdi>' + esc(host) + '</bdi>… (עד כמה שניות)</p>';
+  try {
+    const d = await api('/ports?host=' + encodeURIComponent(host) + '&ports=' + ports.join(','), 30000);
+    const rows = d.results.sort((a, b) => (b.open - a.open) || a.port - b.port).map(r => {
+      const st = r.open ? '<span class="badge b-ok">פתוח</span>'
+        : r.timeout ? '<span class="badge b-warn">לא מגיב (מסונן)</span>'
+        : '<span class="badge b-bad">סגור</span>';
+      return `<tr><td class="num">${r.port}</td><td>${esc(SERVICE[r.port] || '')}</td><td>${st}</td><td class="num">${r.open ? r.ms + ' ms' : ''}</td></tr>`;
+    }).join('');
+    const openCount = d.results.filter(r => r.open).length;
+    out.innerHTML = `<p style="margin-top:14px; font-size:14px;"><strong>${openCount}</strong> מתוך ${d.results.length} פורטים פתוחים ב-<bdi>${esc(d.host)}</bdi></p>
+      <table><thead><tr><th scope="col">פורט</th><th scope="col">שירות</th><th scope="col">מצב</th><th scope="col">זמן חיבור</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="hint">"סגור" — המחשב ענה שאין שם שירות. "לא מגיב" — אין תשובה בכלל, בדרך כלל חומת אש שחוסמת בשקט.</p>`;
+  } catch (err) {
+    out.innerHTML = '<div class="err">' + esc(err.name === 'TimeoutError' ? 'הבדיקה לקחה יותר מדי זמן. נסו פחות פורטים.' : err.message) + '</div>';
+  }
+  btn.disabled = false; btn.textContent = 'בדיקת פורטים';
+});
+
+/* ---------- Speed test ---------- */
+const PHASE_MS = 8000, WARMUP_MS = 1200, STREAMS = 4;
+let speedRunning = false;
+const fmt = mbps => mbps >= 100 ? mbps.toFixed(0) : mbps.toFixed(1);
+function setBar(p) { $('speed-bar').style.width = Math.min(100, p * 100) + '%'; }
+function activate(id) { ['g-ping','g-down','g-up'].forEach(g => $(g).classList.toggle('active', g === id)); }
+
+async function measurePing() {
+  const samples = [];
+  let meta = {};
+  for (let i = 0; i < 12; i++) {
+    const t = performance.now();
+    const r = await fetch(SPEED + '/__down?bytes=0&_=' + Math.random(), { cache: 'no-store' });
+    await r.arrayBuffer();
+    samples.push(performance.now() - t);
+    if (i === 0) meta = { ip: r.headers.get('cf-meta-ip'), colo: r.headers.get('cf-meta-colo'), city: r.headers.get('cf-meta-city') };
+    setBar((i + 1) / 12 * 0.1);
+  }
+  samples.shift(); // first request includes TCP/TLS setup
+  samples.sort((a, b) => a - b);
+  const median = samples[Math.floor(samples.length / 2)];
+  const jitter = samples.slice(1).reduce((s, v, i) => s + Math.abs(v - samples[i]), 0) / (samples.length - 1);
+  return { ping: median, jitter, meta };
+}
+
+// Counts bytes only after a warm-up, so TCP slow start doesn't drag the result down.
+async function measureDownload(onRate, barFrom, barTo) {
+  const start = performance.now(), end = start + PHASE_MS;
+  let bytes = 0, mStart = null, mBytes = 0;
+  const ctrl = new AbortController();
+  const tick = setInterval(() => {
+    const now = performance.now();
+    setBar(barFrom + (barTo - barFrom) * Math.min(1, (now - start) / PHASE_MS));
+    if (mStart != null && now - mStart > 300) onRate((bytes - mBytes) * 8 / ((now - mStart) / 1000) / 1e6);
+  }, 200);
+  const stream = async () => {
+    while (performance.now() < end) {
+      try {
+        const r = await fetch(SPEED + '/__down?bytes=25000000&_=' + Math.random(), { cache: 'no-store', signal: ctrl.signal });
+        const reader = r.body.getReader();
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          bytes += value.length;
+          const now = performance.now();
+          if (mStart == null && now - start > WARMUP_MS) { mStart = now; mBytes = bytes; }
+          if (now >= end) { ctrl.abort(); break; }
+        }
+      } catch { break; }
+    }
+  };
+  await Promise.all(Array.from({ length: STREAMS }, stream));
+  clearInterval(tick);
+  const t = performance.now();
+  return mStart != null ? (bytes - mBytes) * 8 / ((t - mStart) / 1000) / 1e6 : bytes * 8 / ((t - start) / 1000) / 1e6;
+}
+
+// fetch() has no upload progress, so throughput is counted per completed chunk.
+async function measureUpload(onRate, barFrom, barTo) {
+  const chunk = new Uint8Array(4 * 1024 * 1024);
+  for (let i = 0; i < chunk.length; i += 65536) crypto.getRandomValues(chunk.subarray(i, Math.min(i + 65536, chunk.length)));
+  const blob = new Blob([chunk]);
+  const start = performance.now(), end = start + PHASE_MS;
+  let bytes = 0, mStart = null, mBytes = 0;
+  const tick = setInterval(() => setBar(barFrom + (barTo - barFrom) * Math.min(1, (performance.now() - start) / PHASE_MS)), 200);
+  const stream = async () => {
+    while (performance.now() < end) {
+      try {
+        const r = await fetch(SPEED + '/__up?_=' + Math.random(), { method: 'POST', body: blob, cache: 'no-store' });
+        await r.arrayBuffer();
+      } catch { break; }
+      bytes += chunk.length;
+      const now = performance.now();
+      if (mStart == null) { if (now - start > WARMUP_MS) { mStart = now; mBytes = bytes; } }
+      else onRate((bytes - mBytes) * 8 / ((now - mStart) / 1000) / 1e6);
+    }
+  };
+  await Promise.all(Array.from({ length: STREAMS }, stream));
+  clearInterval(tick);
+  const t = performance.now();
+  return mStart != null && bytes > mBytes ? (bytes - mBytes) * 8 / ((t - mStart) / 1000) / 1e6 : bytes * 8 / ((t - start) / 1000) / 1e6;
+}
+
+$('speed-btn').addEventListener('click', async () => {
+  if (speedRunning) return;
+  speedRunning = true;
+  const btn = $('speed-btn'), status = $('speed-status');
+  btn.disabled = true;
+  ['v-ping','v-down','v-up'].forEach(id => $(id).textContent = '—');
+  $('speed-meta').innerHTML = '';
+  try {
+    activate('g-ping'); status.textContent = 'מודד זמן תגובה…';
+    const p = await measurePing();
+    $('v-ping').textContent = Math.round(p.ping);
+    activate('g-down'); status.textContent = 'מודד מהירות הורדה…';
+    const down = await measureDownload(r => $('v-down').textContent = fmt(r), 0.1, 0.55);
+    $('v-down').textContent = fmt(down);
+    activate('g-up'); status.textContent = 'מודד מהירות העלאה…';
+    const up = await measureUpload(r => $('v-up').textContent = fmt(r), 0.55, 1);
+    $('v-up').textContent = fmt(up);
+    activate(null); setBar(1);
+    status.textContent = 'הבדיקה הסתיימה.';
+    const m = [];
+    if (p.meta.ip) m.push('הכתובת שלך: <bdi>' + esc(p.meta.ip) + '</bdi>');
+    if (p.meta.colo) m.push('שרת בדיקה: <bdi>' + esc(p.meta.colo) + '</bdi>');
+    m.push('ריצוד: <bdi>' + Math.round(p.jitter) + ' ms</bdi>');
+    $('speed-meta').innerHTML = m.map(x => '<span>' + x + '</span>').join('');
+  } catch {
+    activate(null);
+    status.textContent = 'הבדיקה נכשלה — ייתכן שחוסם פרסומות או חומת אש חוסמים את speed.cloudflare.com.';
+  }
+  btn.disabled = false; btn.textContent = 'בדיקה חוזרת';
+  speedRunning = false;
+});
+
+/* ---------- Top Hebrew sites ---------- */
+const TOP = [
+  ['חדשות ותוכן', [
+    ['ynet','ynet.co.il'],['mako','mako.co.il'],['וואלה','walla.co.il'],['מעריב','maariv.co.il'],
+    ['ישראל היום','israelhayom.co.il'],['הארץ','haaretz.co.il'],['כאן','kan.org.il'],['ערוץ 7','inn.co.il'],
+    ['בחדרי חרדים','bhol.co.il'],['כיכר השבת','kikar.co.il'],['סרוגים','srugim.co.il'],['0404','0404.co.il'],
+  ]],
+  ['כלכלה', [
+    ['כלכליסט','calcalist.co.il'],['גלובס','globes.co.il'],['TheMarker','themarker.com'],['ביזפורטל','bizportal.co.il'],
+  ]],
+  ['ספורט', [
+    ['ספורט 5','sport5.co.il'],['ONE','one.co.il'],['ווינר','winner.co.il'],
+  ]],
+  ['קניות ומודעות', [
+    ['יד2','yad2.co.il'],['זאפ','zap.co.il'],['KSP','ksp.co.il'],['שופרסל','shufersal.co.il'],
+    ['רמי לוי','rami-levy.co.il'],['באג','bug.co.il'],['איביורי','ivory.co.il'],['הום סנטר','homecenter.co.il'],
+  ]],
+  ['בנקים ואשראי', [
+    ['בנק הפועלים','bankhapoalim.co.il'],['בנק לאומי','leumi.co.il'],['בנק דיסקונט','discountbank.co.il'],
+    ['מזרחי טפחות','mizrahi-tefahot.co.il'],['ישראכרט','isracard.co.il'],['מקס','max.co.il'],['כאל','cal-online.co.il'],
+  ]],
+  ['ממשל ושירותים', [
+    ['gov.il','www.gov.il'],['ביטוח לאומי','btl.gov.il'],['דואר ישראל','israelpost.co.il'],['רכבת ישראל','rail.co.il'],
+    ['חברת החשמל','iec.co.il'],['בזק','bezeq.co.il'],['דפי זהב / 144','b144.co.il'],['ויקיפדיה','he.wikipedia.org'],
+  ]],
+  ['בריאות', [
+    ['כללית','clalit.co.il'],['מכבי','maccabi4u.co.il'],['מאוחדת','meuhedet.co.il'],['לאומית','leumit.co.il'],
+  ]],
+];
+// Google's favicon service misses some sites on the bare domain; these point it elsewhere.
+const ICON_OVERRIDE = {
+  'leumi.co.il': 'https://www.google.com/s2/favicons?domain=www.leumi.co.il&sz=64',
+  'max.co.il': 'https://www.google.com/s2/favicons?domain=www.max.co.il&sz=64',
+  'maccabi4u.co.il': 'https://www.google.com/s2/favicons?domain=www.maccabi4u.co.il&sz=64',
+  'discountbank.co.il': 'https://www.discountbank.co.il/favicon.ico',
+  'mizrahi-tefahot.co.il': 'https://www.mizrahi-tefahot.co.il/favicon.ico',
+};
+const iconUrl = d => ICON_OVERRIDE[d] || `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+$('top-list').innerHTML = TOP.map(([cat, sites]) => `
+  <div class="cat"><div class="cat-name">${esc(cat)}</div><div class="sites">${sites.map(([n, d]) => `
+    <div class="site"><a href="https://${d}" target="_blank" rel="noopener"><span class="fav" aria-hidden="true"><img src="${esc(iconUrl(d))}" alt="" width="20" height="20" loading="lazy" onerror="this.parentNode.textContent='${esc(n).charAt(0)}'"></span><span>${esc(n)}<span class="dom">${d}</span></span></a><span class="badge b-idle" data-dom="${d}">לא נבדק</span></div>`).join('')}
+  </div></div>`).join('');
+
+$('top-btn').addEventListener('click', async () => {
+  const btn = $('top-btn'), status = $('top-status');
+  const badges = [...document.querySelectorAll('[data-dom]')];
+  btn.disabled = true;
+  badges.forEach(b => { b.className = 'badge b-idle'; b.textContent = 'ממתין'; });
+  let done = 0, up = 0, apiDown = false;
+  const queue = badges.slice();
+  const worker = async () => {
+    while (queue.length && !apiDown) {
+      const b = queue.shift();
+      b.textContent = 'בודק…';
+      try {
+        const d = await api('/site?url=' + encodeURIComponent('https://' + b.dataset.dom));
+        const v = siteVerdict(d);
+        const ok = v.cls !== 'bad';
+        if (ok) up++;
+        b.className = 'badge ' + (ok ? 'b-ok' : 'b-bad');
+        b.textContent = ok ? (d.ms != null ? d.ms + ' ms' : 'זמין') : 'לא זמין';
+      } catch { apiDown = true; b.className = 'badge b-idle'; b.textContent = 'לא נבדק'; }
+      done++;
+      status.textContent = `נבדקו ${done} מתוך ${badges.length}`;
+    }
+  };
+  await Promise.all(Array.from({ length: 5 }, worker));
+  status.textContent = apiDown ? 'שרת הבדיקה לא זמין כרגע.' : `${up} מתוך ${badges.length} אתרים זמינים.`;
+  btn.disabled = false;
+});
+
+/* ---------- Downloads ---------- */
+const DL = [
+  ['תמיכה מרחוק', [
+    ['AnyDesk','חיבור מרחוק מהיר, גרסה ניידת שלא דורשת התקנה.','anydesk.com','https://anydesk.com/download'],
+    ['TeamViewer','חיבור מרחוק — גרסה מלאה או QuickSupport חד-פעמית.','teamviewer.com','https://www.teamviewer.com/download/'],
+    ['RustDesk','חיבור מרחוק בקוד פתוח, ללא צורך בחשבון.','rustdesk.com','https://rustdesk.com/'],
+    ['Chrome Remote Desktop','חיבור מרחוק דרך דפדפן Chrome וחשבון Google.','remotedesktop.google.com','https://remotedesktop.google.com/support'],
+  ]],
+  ['אבחון חומרה', [
+    ['CPU-Z','פרטי מעבד, לוח אם וזיכרון.','cpuid.com','https://www.cpuid.com/softwares/cpu-z.html'],
+    ['HWiNFO','מידע מלא על החומרה וחיישני טמפרטורה ומתח.','hwinfo.com','https://www.hwinfo.com/download/'],
+    ['CrystalDiskInfo','מצב בריאות הדיסק (S.M.A.R.T) — אזהרה מוקדמת לפני תקלה.','crystalmark.info','https://crystalmark.info/en/software/crystaldiskinfo/'],
+    ['CrystalDiskMark','בדיקת מהירות קריאה וכתיבה של דיסק.','crystalmark.info','https://crystalmark.info/en/software/crystaldiskmark/'],
+    ['MemTest86','בדיקת זיכרון RAM מדיסק-און-קי, לפני עליית Windows.','memtest86.com','https://www.memtest86.com/download.htm'],
+    ['BlueScreenView','קריאת קבצי מסך כחול לאיתור הדרייבר שגרם לקריסה.','nirsoft.net','https://www.nirsoft.net/utils/blue_screen_view.html'],
+  ]],
+  ['רשת', [
+    ['Advanced IP Scanner','סריקת הרשת המקומית — אילו מכשירים מחוברים ובאילו כתובות.','advanced-ip-scanner.com','https://www.advanced-ip-scanner.com/'],
+    ['Wireshark','הקלטה וניתוח של תעבורת רשת.','wireshark.org','https://www.wireshark.org/download.html'],
+    ['Nmap','סריקת פורטים ושירותים ברשת.','nmap.org','https://nmap.org/download'],
+    ['PuTTY','התחברות SSH ו-Telnet לשרתים ולציוד רשת.','chiark.greenend.org.uk','https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html'],
+    ['WinSCP','העברת קבצים ב-SFTP ו-FTP.','winscp.net','https://winscp.net/eng/download.php'],
+  ]],
+  ['אבטחה וניקוי', [
+    ['Malwarebytes','סריקה והסרה של תוכנות זדוניות ופרסומות.','malwarebytes.com','https://www.malwarebytes.com/mwb-download'],
+    ['Microsoft Safety Scanner','סורק חד-פעמי של מיקרוסופט, ללא התקנה.','microsoft.com','https://learn.microsoft.com/en-us/defender-endpoint/safety-scanner-download'],
+    ['Autoruns','כל מה שעולה עם Windows — לאיתור תוכנות שמאטות את ההפעלה.','microsoft.com','https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns'],
+    ['Process Explorer','מנהל משימות מתקדם — איזה תהליך תופס קובץ או מעבד.','microsoft.com','https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer'],
+    ['Sysinternals Suite','כל כלי Sysinternals של מיקרוסופט בחבילה אחת.','microsoft.com','https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite'],
+  ]],
+  ['דיסק, התקנה ומערכת', [
+    ['TreeSize Free','מה תופס מקום בכונן.','jam-software.com','https://www.jam-software.com/treesize_free'],
+    ['WizTree','סריקת שטח דיסק מהירה במיוחד.','diskanalyzer.com','https://diskanalyzer.com/'],
+    ['Rufus','יצירת דיסק-און-קי להתקנת Windows או Linux.','rufus.ie','https://rufus.ie/'],
+    ['Ventoy','דיסק-און-קי אחד עם כמה קובצי ISO במקביל.','ventoy.net','https://www.ventoy.net/en/download.html'],
+    ['Windows 11 — התקנה','כלי יצירת מדיה וקובצי ISO רשמיים של מיקרוסופט.','microsoft.com','https://www.microsoft.com/software-download/windows11'],
+    ['Display Driver Uninstaller','הסרה נקייה של דרייבר כרטיס מסך לפני התקנה מחדש.','guru3d.com','https://www.guru3d.com/download/display-driver-uninstaller-download/'],
+    ['Everything','חיפוש קבצים מיידי בכל הכוננים.','voidtools.com','https://www.voidtools.com/'],
+    ['7-Zip','פתיחה ודחיסה של ZIP, RAR, 7z ועוד.','7-zip.org','https://www.7-zip.org/'],
+    ['Notepad++','עורך טקסט לקובצי הגדרות ולוגים.','notepad-plus-plus.org','https://notepad-plus-plus.org/downloads/'],
+    ['Ninite','התקנה של כמה תוכנות נפוצות בבת אחת, בלי תוספות.','ninite.com','https://ninite.com/'],
+  ]],
+];
+$('dl-list').innerHTML = DL.map(([cat, items]) => `
+  <div class="cat"><div class="cat-name">${esc(cat)}</div><div class="dl-list">${items.map(([n, desc, src, href]) => `
+    <div class="dl-row"><div><div class="dl-name">${esc(n)}</div><div class="dl-desc">${esc(desc)}</div><div class="dl-src">מקור: <bdi>${esc(src)}</bdi></div></div>
+    <a class="btn btn-sm" href="${href}" target="_blank" rel="noopener">לדף ההורדה<span class="sr-only"> של ${esc(n)} (נפתח בחלון חדש)</span></a></div>`).join('')}
+  </div></div>`).join('');
+</script>
+</body>
+</html>
