@@ -47,7 +47,7 @@
   var list = p.images.map(function (im, i) { return { src: 'img/' + p.slug + '/' + im[0] + '.webp', alt: p.title + ' — תמונה ' + (i + 1) + ' מתוך ' + p.images.length }; });
   var gal = document.getElementById('gal');
   gal.innerHTML = p.images.map(function (im, i) {
-    return '<button type="button" data-i="' + i + '" aria-label="הגדלת תמונה ' + (i + 1) + '"><img src="img/' + p.slug + '/t/' + im[0] + '.webp" alt="' + list[i].alt + '" width="' + im[1] + '" height="' + im[2] + '" loading="' + (i < 6 ? 'eager' : 'lazy') + '"></button>';
+    return '<button type="button" style="--r:' + (im[1] / im[2]).toFixed(3) + '" data-i="' + i + '" aria-label="הגדלת תמונה ' + (i + 1) + '"><img src="img/' + p.slug + '/t/' + im[0] + '.webp" alt="' + list[i].alt + '" width="' + im[1] + '" height="' + im[2] + '" loading="' + (i < 6 ? 'eager' : 'lazy') + '"></button>';
   }).join('');
   gal.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (b) GENS_LB.open(list, +b.dataset.i, b);
