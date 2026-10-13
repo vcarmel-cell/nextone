@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>פרויקט | גנס אדריכלות נוף</title>
+<meta name="description" content="גלריית תמונות מפרויקט של גנס אדריכלות נוף.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="projects">
+<main id="main" tabindex="-1">
+  <div class="page-head">
+    <div class="wrap">
+      <div class="crumbs"><a href="index.html">בית</a> / <a href="projects.html">פרויקטים</a> / <span id="crumb"></span></div>
+      <h1 id="title"></h1>
+      <div class="proj-meta" id="meta"></div>
+    </div>
+  </div>
+  <section style="padding-top:40px">
+    <div class="wrap">
+      <div class="masonry" id="gal"></div>
+      <nav class="proj-nav" aria-label="פרויקטים נוספים" id="pnav"></nav>
+    </div>
+  </section>
+</main>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/site.js"></script>
+<script>
+(function () {
+  var slug = new URLSearchParams(location.search).get('p');
+  var idx = GENS_PROJECTS.findIndex(function (p) { return p.slug === slug; });
+  if (idx < 0) { location.replace('projects.html'); return; }
+  var p = GENS_PROJECTS[idx];
+  document.title = p.title + ' | גנס אדריכלות נוף';
+  document.querySelector('meta[name=description]').content = p.title + ' — ' + p.kind + ' בתכנון וביצוע גנס אדריכלות נוף. ' + p.images.length + ' תמונות מהפרויקט.';
+  document.getElementById('crumb').textContent = p.title;
+  document.getElementById('title').textContent = p.title;
+  document.getElementById('meta').innerHTML = '<span>סוג: <b>' + p.kind + '</b></span><span>מיקום: <b>' + p.place + '</b></span><span><b>' + p.images.length + '</b> תמונות</span>';
+
+  var list = p.images.map(function (im, i) { return { src: 'img/' + p.slug + '/' + im[0] + '.webp', alt: p.title + ' — תמונה ' + (i + 1) + ' מתוך ' + p.images.length }; });
+  var gal = document.getElementById('gal');
+  gal.innerHTML = p.images.map(function (im, i) {
+    return '<button type="button" data-i="' + i + '" aria-label="הגדלת תמונה ' + (i + 1) + '"><img src="img/' + p.slug + '/t/' + im[0] + '.webp" alt="' + list[i].alt + '" width="' + im[1] + '" height="' + im[2] + '" loading="' + (i < 6 ? 'eager' : 'lazy') + '"></button>';
+  }).join('');
+  gal.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (b) GENS_LB.open(list, +b.dataset.i, b);
+  });
+
+  var prev = GENS_PROJECTS[(idx - 1 + GENS_PROJECTS.length) % GENS_PROJECTS.length];
+  var next = GENS_PROJECTS[(idx + 1) % GENS_PROJECTS.length];
+  document.getElementById('pnav').innerHTML =
+    '<a href="project.html?p=' + prev.slug + '"><span>לפרויקט הקודם</span><b>' + prev.title + '</b></a>' +
+    '<a class="next" href="project.html?p=' + next.slug + '"><span>לפרויקט הבא</span><b>' + next.title + '</b></a>';
+})();
+</script>
+</body>
+</html>
