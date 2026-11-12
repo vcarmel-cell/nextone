@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>ניהול דיווחי תקלות — ניצנים</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --paper:#EFF2F6; --panel:#FFFFFF; --panel-2:#F6F8FB;
+    --ink:#10233F; --ink-soft:#44546C; --ink-faint:#5E6E88;
+    --rule:#D3DBE6; --accent:#126EB1; --accent-strong:#0D5A93; --accent-contrast:#FFFFFF; --accent-bg:#DCE9F5;
+    --bad:#B42318; --bad-bg:#FBE3E0;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#0C1626; --panel:#132139; --panel-2:#182A45;
+      --ink:#E6EDF6; --ink-soft:#A6B4C7; --ink-faint:#8090A8;
+      --rule:#22334F; --accent:#4FA3E0; --accent-strong:#7DBBEB; --accent-contrast:#08131F; --accent-bg:#132A4A;
+      --bad:#F2877C; --bad-bg:#3A1A18;
+    }
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  html,body{margin:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans Hebrew', Arial, sans-serif; padding-inline:16px;}
+  .wrap{max-width:960px; margin:0 auto;}
+  h1,h2{font-family:'Rubik', Arial, sans-serif; font-weight:800; margin:0;}
+  p{margin:0; line-height:1.6;}
+  .mono{font-family:'IBM Plex Mono',monospace; unicode-bidi:isolate;}
+  a:focus-visible, button:focus-visible, input:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+
+  header{padding-block:14px; border-bottom:1px solid var(--rule); display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand img{width:30px; height:30px; display:block;}
+  .brand .t{font-family:'Rubik',Arial,sans-serif; font-weight:700; font-size:15px;}
+  .brand .s{font-size:12px; color:var(--ink-faint);}
+
+  input[type=password], input[type=date]{font:inherit; font-size:15px; padding:9px 11px; border:1.5px solid var(--rule); background:var(--paper); color:var(--ink); border-radius:0; color-scheme:light dark;}
+  input:focus{border-color:var(--accent); outline:none;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 18px; font-family:inherit; font-weight:600; font-size:14px; border:1.5px solid transparent; cursor:pointer; border-radius:0; background:var(--accent); color:var(--accent-contrast);}
+  .btn:hover{background:var(--accent-strong);}
+  .btn:disabled{opacity:.55; cursor:default;}
+  .btn-ghost{background:transparent; border-color:var(--rule); color:var(--ink);}
+  .btn-ghost:hover{background:transparent; border-color:var(--ink-soft);}
+  .btn-sm{padding:6px 11px; font-size:12.5px;}
+  .btn-danger{background:transparent; border-color:var(--rule); color:var(--bad);}
+  .btn-danger:hover{background:var(--bad-bg); border-color:var(--bad);}
+  .err{margin-top:12px; padding:10px 12px; background:var(--bad-bg); color:var(--bad); font-size:13.5px;}
+
+  #login{max-width:360px; margin:60px auto; background:var(--panel); border:1px solid var(--rule); padding:24px;}
+  #login h1{font-size:20px;}
+  #login p{color:var(--ink-soft); font-size:13.5px; margin-top:6px;}
+  #login form{display:flex; gap:8px; margin-top:16px;}
+  #login input{flex:1; min-width:0;}
+
+  #app{display:none; padding-bottom:40px;}
+  .bar{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; padding-block:18px;}
+  .bar label{display:flex; flex-direction:column; gap:4px; font-size:12px; font-weight:600; color:var(--ink-soft);}
+  .bar .grow{flex:1;}
+  .stats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule);}
+  .stat{background:var(--panel); padding:14px 16px;}
+  .stat .k{font-size:12px; color:var(--ink-soft); font-weight:600;}
+  .stat .v{font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:600; margin-top:4px; font-variant-numeric:tabular-nums;}
+  .stat .u{font-size:11.5px; color:var(--ink-faint);}
+
+  .panel{background:var(--panel); border:1px solid var(--rule); margin-top:16px; padding:16px;}
+  .panel h2{font-size:15px; font-weight:700;}
+  .panel .sub{font-size:12px; color:var(--ink-faint); margin-top:2px;}
+  .hours{display:grid; grid-template-columns:repeat(24,minmax(0,1fr)); gap:3px; align-items:end; height:120px; margin-top:14px; direction:ltr;}
+  .hours .col{display:flex; flex-direction:column; justify-content:flex-end; height:100%; position:relative;}
+  .hours .b{background:var(--accent); min-height:0;}
+  .hours .b.zero{background:var(--rule); height:2px !important;}
+  .hours-axis{display:grid; grid-template-columns:repeat(24,minmax(0,1fr)); gap:3px; direction:ltr; margin-top:4px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-faint); text-align:center;}
+
+  .incident{background:var(--panel); border:1px solid var(--rule); margin-top:16px;}
+  .inc-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; padding:12px 16px; background:var(--panel-2); border-bottom:1px solid var(--rule);}
+  .inc-head .t{font-weight:700; font-size:14.5px;}
+  .inc-head .n{font-size:12.5px; color:var(--ink-soft);}
+  .rep{display:grid; grid-template-columns:auto 1fr auto; gap:14px; padding:12px 16px; border-top:1px solid var(--rule); align-items:start;}
+  .rep:first-of-type{border-top:none;}
+  .rep .thumb{width:72px; height:72px; border:1px solid var(--rule); background:var(--panel-2); padding:0; cursor:pointer; display:block;}
+  .rep .thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+  .rep .nothumb{width:72px; height:72px; border:1px dashed var(--rule); display:grid; place-items:center; font-size:11px; color:var(--ink-faint); text-align:center;}
+  .rep .who{font-weight:600; font-size:14px;}
+  .rep .who.anon{color:var(--ink-faint); font-weight:500;}
+  .rep .times{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+  .rep .desc{font-size:14px; margin-top:6px; white-space:pre-wrap; overflow-wrap:anywhere;}
+  .empty{padding:40px 16px; text-align:center; color:var(--ink-faint); background:var(--panel); border:1px solid var(--rule); margin-top:16px;}
+
+  dialog{border:1px solid var(--rule); padding:0; background:var(--panel); color:var(--ink); max-width:min(92vw,900px);}
+  dialog::backdrop{background:rgba(5,12,24,.7);}
+  dialog img{display:block; max-width:100%; max-height:80vh;}
+  dialog .dh{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--rule); font-size:13px;}
+
+  @media (max-width:640px){
+    .stats{grid-template-columns:1fr;}
+    .rep{grid-template-columns:auto 1fr;}
+    .rep .del{grid-column:1 / -1; justify-self:start;}
+    .hours-axis span:nth-child(odd){visibility:hidden;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <img src="favicon.svg" alt="" width="30" height="30">
+      <div><div class="t">דיווחי תקלות אינטרנט</div><div class="s">ניהול · קיבוץ ניצנים</div></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="logout" hidden>יציאה</button>
+  </header>
+
+  <section id="login" aria-labelledby="login-h">
+    <h1 id="login-h">כניסה לניהול</h1>
+    <p>הקלידו את סיסמת הניהול.</p>
+    <form id="login-f">
+      <label for="pw" class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">סיסמה</label>
+      <input type="password" id="pw" autocomplete="current-password" required>
+      <button class="btn" type="submit" id="login-b">כניסה</button>
+    </form>
+    <div id="login-err" role="alert"></div>
+  </section>
+
+  <main id="app">
+    <div class="bar">
+      <label>מתאריך<input type="date" id="from"></label>
+      <label>עד תאריך<input type="date" id="to"></label>
+      <span class="grow"></span>
+      <button class="btn btn-ghost" id="csv">ייצוא ל־Excel ‏(CSV)</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">דיווחים</div><div class="v" id="s-reports">0</div><div class="u">בטווח שנבחר</div></div>
+      <div class="stat"><div class="k">אירועי תקלה</div><div class="v" id="s-incidents">0</div><div class="u">דיווחים בהפרש של עד שעה מקובצים לאירוע אחד</div></div>
+      <div class="stat"><div class="k">ימים עם תקלה</div><div class="v" id="s-days">0</div><div class="u">ימים שונים</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>באיזו שעה ביום נופל האינטרנט</h2>
+      <div class="sub">מספר הדיווחים לפי שעת התחלת התקלה</div>
+      <div class="hours" id="hours" role="img" aria-label="התפלגות דיווחים לפי שעה ביום"></div>
+      <div class="hours-axis" id="hours-axis" aria-hidden="true"></div>
+    </div>
+
+    <div id="list" aria-live="polite"></div>
+  </main>
+</div>
+
+<dialog id="dlg" aria-label="תמונת הראוטר">
+  <div class="dh"><span id="dlg-t"></span><button class="btn btn-ghost btn-sm" id="dlg-x">סגירה</button></div>
+  <img id="dlg-img" alt="תמונת הראוטר מהדיווח">
+</dialog>
+
+<script>
+(function(){
+  var firebaseConfig = {
+    apiKey: "AIzaSyCFQSpmiSvDepYn08jNkl9Q-zCVdI0BYN4",
+    authDomain: "voice-reminders-d641e.firebaseapp.com",
+    projectId: "voice-reminders-d641e",
+    storageBucket: "voice-reminders-d641e.firebasestorage.app",
+    messagingSenderId: "900498730463",
+    appId: "1:900498730463:web:6899f5d9e9783678b0a86a"
+  };
+  // Dedicated Firebase Auth user; Firestore rules grant read/delete on outage_reports to this account only.
+  var ADMIN_EMAIL = 'apps-admin@next1.co.il';
+  var INCIDENT_GAP_MIN = 60;
+
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth(), db = firebase.firestore();
+  var $ = function(id){ return document.getElementById(id); };
+  var all = [], unsub = null;
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function ymd(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function fmt(d, withDate){
+    var t = pad(d.getHours())+':'+pad(d.getMinutes());
+    return withDate ? d.toLocaleDateString('he-IL',{weekday:'short', day:'numeric', month:'numeric', year:'2-digit'}) + ' ' + t : t;
+  }
+  function hm(d){ return pad(d.getHours())+':'+pad(d.getMinutes()); }
+  function day(d){ return d.toLocaleDateString('he-IL',{weekday:'short', day:'numeric', month:'numeric'}); }
+  function ltr(s){ return '<span class="mono" dir="ltr">' + s + '</span>'; }
+  function dtHtml(d){ return esc(day(d)) + ' ' + ltr(hm(d)); }
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  $('to').value = ymd(new Date());
+  $('from').value = ymd(new Date(Date.now() - 29*86400000));
+
+  // ---- auth
+  $('login-f').addEventListener('submit', function(e){
+    e.preventDefault();
+    $('login-b').disabled = true; $('login-err').innerHTML = '';
+    auth.signInWithEmailAndPassword(ADMIN_EMAIL, $('pw').value).catch(function(err){
+      var bad = /wrong-password|invalid-credential|invalid-login|user-not-found/.test(err.code || '');
+      $('login-err').innerHTML = '<div class="err">' + (bad ? 'סיסמה שגויה.' : 'הכניסה נכשלה: ' + esc(err.code || err.message)) + '</div>';
+    }).then(function(){ $('login-b').disabled = false; });
+  });
+  $('logout').addEventListener('click', function(){ auth.signOut(); });
+
+  auth.onAuthStateChanged(function(user){
+    var ok = user && user.email === ADMIN_EMAIL;
+    $('login').style.display = ok ? 'none' : '';
+    $('app').style.display = ok ? 'block' : 'none';
+    $('logout').hidden = !ok;
+    if (unsub){ unsub(); unsub = null; }
+    if (!ok){ all = []; return; }
+    $('pw').value = '';
+    subscribe();
+  });
+
+  function subscribe(){
+    if (unsub) unsub();
+    var from = new Date($('from').value + 'T00:00');
+    var to = new Date($('to').value + 'T23:59:59.999');
+    unsub = db.collection('outage_reports')
+      .where('faultAt', '>=', firebase.firestore.Timestamp.fromDate(from))
+      .where('faultAt', '<=', firebase.firestore.Timestamp.fromDate(to))
+      .orderBy('faultAt', 'desc')
+      .onSnapshot(function(snap){
+        all = snap.docs.map(function(d){
+          var x = d.data();
+          return { id:d.id, name:x.name||'', description:x.description||'', photo:x.photo||'',
+                   faultAt: x.faultAt ? x.faultAt.toDate() : null,
+                   createdAt: x.createdAt ? x.createdAt.toDate() : null };
+        }).filter(function(r){ return r.faultAt; });
+        render();
+      }, function(err){
+        console.error(err);
+        $('list').innerHTML = '<div class="err">טעינת הדיווחים נכשלה: ' + esc(err.code || err.message) + '</div>';
+      });
+  }
+  $('from').addEventListener('change', subscribe);
+  $('to').addEventListener('change', subscribe);
+
+  // Group reports whose fault times are within INCIDENT_GAP_MIN of each other (list is newest first).
+  function incidents(rows){
+    var asc = rows.slice().sort(function(a,b){ return a.faultAt - b.faultAt; });
+    var groups = [], cur = null;
+    asc.forEach(function(r){
+      if (cur && r.faultAt - cur.end <= INCIDENT_GAP_MIN*60000){ cur.items.push(r); cur.end = r.faultAt; }
+      else { cur = { start:r.faultAt, end:r.faultAt, items:[r] }; groups.push(cur); }
+    });
+    groups.forEach(function(g){ g.items.reverse(); });
+    return groups.reverse();
+  }
+
+  function render(){
+    var groups = incidents(all);
+    var days = {}; all.forEach(function(r){ days[ymd(r.faultAt)] = 1; });
+    $('s-reports').textContent = all.length;
+    $('s-incidents').textContent = groups.length;
+    $('s-days').textContent = Object.keys(days).length;
+
+    var hours = new Array(24).fill(0);
+    all.forEach(function(r){ hours[r.faultAt.getHours()]++; });
+    var max = Math.max.apply(null, hours) || 1;
+    $('hours').innerHTML = hours.map(function(n,h){
+      return '<div class="col" title="' + pad(h) + ':00 · ' + n + ' דיווחים"><div class="b' + (n ? '' : ' zero') + '" style="height:' + (n/max*100) + '%"></div></div>';
+    }).join('');
+    $('hours-axis').innerHTML = hours.map(function(_,h){ return '<span>' + h + '</span>'; }).join('');
+
+    if (!all.length){ $('list').innerHTML = '<div class="empty">אין דיווחים בטווח התאריכים הזה.</div>'; return; }
+    $('list').innerHTML = groups.map(function(g){
+      var sameDay = ymd(g.start) === ymd(g.end);
+      var range = g.items.length === 1 ? dtHtml(g.start)
+        : sameDay ? esc(day(g.start)) + ' ' + ltr(hm(g.start) + '–' + hm(g.end))
+        : dtHtml(g.start) + ' עד ' + dtHtml(g.end);
+      return '<section class="incident"><div class="inc-head"><span class="t">' + range + '</span>' +
+        '<span class="n">' + (g.items.length === 1 ? 'דיווח אחד' : g.items.length + ' דיווחים') + '</span></div>' +
+        g.items.map(function(r){
+          var thumb = r.photo
+            ? '<button class="thumb" data-photo="' + r.id + '" aria-label="הגדלת תמונת הראוטר"><img src="' + r.photo + '" alt=""></button>'
+            : '<div class="nothumb">אין תמונה</div>';
+          return '<div class="rep">' + thumb + '<div>' +
+            '<div class="who' + (r.name ? '' : ' anon') + '">' + (r.name ? esc(r.name) : 'ללא שם') + '</div>' +
+            '<div class="times">תקלה: ' + dtHtml(r.faultAt) +
+            (r.createdAt ? ' · דווח: ' + dtHtml(r.createdAt) : '') + '</div>' +
+            (r.description ? '<div class="desc">' + esc(r.description) + '</div>' : '') +
+            '</div><button class="btn btn-danger btn-sm del" data-del="' + r.id + '">מחיקה</button></div>';
+        }).join('') + '</section>';
+    }).join('');
+  }
+
+  $('list').addEventListener('click', function(e){
+    var t = e.target.closest('[data-photo],[data-del]');
+    if (!t) return;
+    var r = all.find(function(x){ return x.id === (t.dataset.photo || t.dataset.del); });
+    if (!r) return;
+    if (t.dataset.photo){
+      $('dlg-img').src = r.photo;
+      $('dlg-t').textContent = (r.name || 'ללא שם') + ' · ' + fmt(r.faultAt, true);
+      $('dlg').showModal();
+    } else if (confirm('למחוק את הדיווח של ' + (r.name || 'ללא שם') + ' מ־' + fmt(r.faultAt, true) + '?')){
+      db.collection('outage_reports').doc(r.id).delete().catch(function(err){ alert('המחיקה נכשלה: ' + (err.code || err.message)); });
+    }
+  });
+  $('dlg-x').addEventListener('click', function(){ $('dlg').close(); });
+  $('dlg').addEventListener('click', function(e){ if (e.target === $('dlg')) $('dlg').close(); });
+
+  $('csv').addEventListener('click', function(){
+    var q = function(s){ return '"' + String(s).replace(/"/g,'""') + '"'; };
+    var lines = [['שעת תקלה','שעת דיווח','שם','תיאור','יש תמונה'].map(q).join(',')];
+    all.forEach(function(r){
+      lines.push([fmt(r.faultAt,true), r.createdAt ? fmt(r.createdAt,true) : '', r.name, r.description, r.photo ? 'כן' : 'לא'].map(q).join(','));
+    });
+    var blob = new Blob(['﻿' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'outage-reports_' + $('from').value + '_' + $('to').value + '.csv';
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  });
+})();
+</script>
+</body>
+</html>

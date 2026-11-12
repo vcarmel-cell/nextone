@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מדיניות פרטיות — דיווח תקלת אינטרנט</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;800&family=IBM+Plex+Sans+Hebrew:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#EFF2F6; --panel:#FFFFFF; --ink:#10233F; --ink-soft:#44546C; --ink-faint:#5E6E88; --rule:#D3DBE6; --accent:#126EB1; }
+  @media (prefers-color-scheme: dark){
+    :root{ --paper:#0C1626; --panel:#132139; --ink:#E6EDF6; --ink-soft:#A6B4C7; --ink-faint:#8090A8; --rule:#22334F; --accent:#4FA3E0; }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans Hebrew',Arial,sans-serif; padding:32px 16px;}
+  .wrap{max-width:640px; margin:0 auto; background:var(--panel); border:1px solid var(--rule);}
+  .head{padding:18px 24px; border-bottom:1px solid var(--rule); display:flex; align-items:center; gap:10px; font-family:'Rubik',Arial,sans-serif; font-weight:700; font-size:15px;}
+  .head img{width:26px; height:26px; display:block;}
+  .body{padding:24px 24px 30px; line-height:1.75; font-size:14.5px; color:var(--ink-soft);}
+  h1{font-family:'Rubik',Arial,sans-serif; font-weight:800; font-size:22px; color:var(--ink); margin:0 0 4px;}
+  .updated{font-size:12.5px; color:var(--ink-faint); margin-bottom:20px;}
+  h2{font-size:15px; font-weight:700; color:var(--ink); margin:22px 0 6px;}
+  p{margin:0 0 4px;} ul{margin:0; padding-inline-start:20px;}
+  a{color:var(--accent);}
+  .back{display:inline-block; margin-top:26px; font-size:13.5px; color:var(--ink-soft); text-decoration:none; border-bottom:1px solid var(--rule);}
+  a:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="head"><img src="favicon.svg" alt="" width="26" height="26">דיווח תקלת אינטרנט · ניצנים</div>
+  <div class="body">
+    <h1>מדיניות פרטיות</h1>
+    <p class="updated">עודכן לאחרונה: נובמבר 2026</p>
+    <h2>מה נאסף</h2>
+    <p>כשאתם שולחים דיווח נשמרים רק הפרטים שמילאתם בטופס:</p>
+    <ul>
+      <li>שעת התקלה (חובה).</li>
+      <li>שם מלא, אם בחרתם למלא.</li>
+      <li>תיאור התקלה, אם בחרתם למלא.</li>
+      <li>תמונת הראוטר, אם בחרתם לצרף. התמונה מוקטנת בדפדפן שלכם לפני השליחה.</li>
+      <li>מועד שליחת הדיווח.</li>
+    </ul>
+    <p>לא נאספים כתובת IP, מיקום, פרטי מכשיר או מזהים אחרים. אין בדף עוגיות מעקב, כלי אנליטיקס או פרסום. כדי למנוע שליחה כפולה נשמר בדפדפן שלכם רק מועד הדיווח האחרון.</p>
+
+    <h2>למה זה משמש</h2>
+    <p>הדיווחים משמשים לאיתור דפוסים בתקלות האינטרנט בקיבוץ (שעות, תדירות, סוג התקלה) ולהעברת מידע מבוסס לספק התשתית. הם לא משמשים לשום מטרה אחרת ולא נמכרים לאף אחד.</p>
+
+    <h2>מי רואה את הדיווחים</h2>
+    <p>רק מנהל המערכת, דרך עמוד ניהול שמוגן בסיסמה. דיווחים לא מוצגים לציבור. במקרה שתיאור או סיכום של תקלה מועבר לספק, הוא יכלול שעות ותיאור טכני, ולא שמות, אלא אם תבקשו אחרת.</p>
+
+    <h2>היכן המידע נשמר</h2>
+    <p>הדיווחים נשמרים בשירות Google Firebase (Cloud Firestore). המידע נשמר כל עוד הוא נחוץ לניתוח התקלות, ונמחק כשאין בו עוד צורך.</p>
+
+    <h2>מחיקת דיווח</h2>
+    <p>כדי למחוק דיווח ששלחתם, כתבו ל־<a href="mailto:support@next1.co.il">support@next1.co.il</a> וציינו את שעת התקלה והשם (אם מילאתם), והדיווח יימחק.</p>
+
+    <a class="back" href="index.html">→ חזרה לטופס הדיווח</a>
+  </div>
+</main>
+</body>
+</html>

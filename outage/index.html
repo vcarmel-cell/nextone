@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דיווח תקלת אינטרנט — ניצנים</title>
+<meta name="description" content="נפל לכם האינטרנט בקיבוץ ניצנים? דווחו מתי זה קרה. בלי הרשמה, פחות מדקה.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --paper:#EFF2F6; --panel:#FFFFFF; --panel-2:#F6F8FB;
+    --ink:#10233F; --ink-soft:#44546C; --ink-faint:#5E6E88;
+    --rule:#D3DBE6; --accent:#126EB1; --accent-strong:#0D5A93; --accent-contrast:#FFFFFF; --accent-bg:#DCE9F5;
+    --ok:#1E7A46; --ok-bg:#DDF1E4; --bad:#B42318; --bad-bg:#FBE3E0;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#0C1626; --panel:#132139; --panel-2:#182A45;
+      --ink:#E6EDF6; --ink-soft:#A6B4C7; --ink-faint:#8090A8;
+      --rule:#22334F; --accent:#4FA3E0; --accent-strong:#7DBBEB; --accent-contrast:#08131F; --accent-bg:#132A4A;
+      --ok:#5CC98A; --ok-bg:#12321F; --bad:#F2877C; --bad-bg:#3A1A18;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans Hebrew', Arial, sans-serif; padding-inline:16px;}
+  .wrap{max-width:620px; margin:0 auto;}
+  h1,h2{font-family:'Rubik', Arial, sans-serif; font-weight:800; margin:0; text-wrap:balance;}
+  p{margin:0; line-height:1.7;}
+  a{color:inherit;}
+  .skip{position:absolute; top:-40px; right:16px; background:var(--accent); color:var(--accent-contrast); padding:8px 12px; z-index:10;}
+  .skip:focus{top:8px;}
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, .drop:focus-within{outline:2px solid var(--accent); outline-offset:3px;}
+
+  header{padding-block:14px; border-bottom:1px solid var(--rule); display:flex; align-items:center; gap:10px;}
+  header img{width:30px; height:30px; display:block;}
+  header .t{font-family:'Rubik',Arial,sans-serif; font-weight:700; font-size:15px;}
+  header .s{font-size:12px; color:var(--ink-faint);}
+
+  .hero{padding-block:30px 20px;}
+  .hero h1{font-size:clamp(25px,5vw,33px); line-height:1.2;}
+  .hero p{margin-top:10px; color:var(--ink-soft); font-size:15px;}
+
+  form{background:var(--panel); border:1px solid var(--rule);}
+  .q{padding:18px 18px 20px; border-top:1px solid var(--rule);}
+  .q:first-child{border-top:none;}
+  .q-head{display:flex; align-items:baseline; gap:10px; margin-bottom:10px;}
+  .q-num{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--accent);}
+  .q label.l, .q .l{font-weight:700; font-size:15.5px;}
+  .opt{font-size:12px; color:var(--ink-faint); font-weight:400;}
+  .req{font-size:12px; color:var(--bad); font-weight:600;}
+  input[type=text], input[type=datetime-local], textarea{width:100%; font:inherit; font-size:16px; padding:11px 12px; border:1.5px solid var(--rule); background:var(--paper); color:var(--ink); border-radius:0;}
+  input:focus, textarea:focus{border-color:var(--accent); outline:none;}
+  textarea{min-height:96px; resize:vertical; line-height:1.6;}
+  input[type=datetime-local]{direction:ltr; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:15px; color-scheme:light dark;}
+  .quick{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .chip{font:inherit; font-size:12.5px; padding:6px 10px; border:1px solid var(--rule); background:var(--paper); color:var(--ink-soft); cursor:pointer; border-radius:0;}
+  .chip:hover{border-color:var(--ink-soft); color:var(--ink);}
+  .hint{font-size:12.5px; color:var(--ink-faint); margin-top:8px; line-height:1.6;}
+
+  .drop{position:relative; display:flex; align-items:center; justify-content:center; gap:10px; min-height:96px; border:1.5px dashed var(--rule); background:var(--paper); color:var(--ink-soft); font-size:14px; cursor:pointer; padding:14px; text-align:center;}
+  .drop:hover{border-color:var(--ink-soft);}
+  .drop input{position:absolute; inset:0; opacity:0; cursor:pointer; width:100%;}
+  .drop svg{flex-shrink:0;}
+  .preview{display:none; margin-top:10px; gap:12px; align-items:flex-start;}
+  .preview.on{display:flex;}
+  .preview img{width:120px; height:120px; object-fit:cover; border:1px solid var(--rule); display:block;}
+  .preview .meta{font-size:12.5px; color:var(--ink-faint); line-height:1.6;}
+
+  .actions{padding:18px; border-top:1px solid var(--rule); background:var(--panel-2);}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:14px 20px; font-family:inherit; font-weight:700; font-size:16px; border:1.5px solid transparent; cursor:pointer; border-radius:0; background:var(--accent); color:var(--accent-contrast);}
+  .btn:hover{background:var(--accent-strong);}
+  .btn:disabled{opacity:.55; cursor:default;}
+  .btn-ghost{background:transparent; border-color:var(--rule); color:var(--ink); width:auto; font-size:13.5px; padding:8px 14px; font-weight:600;}
+  .btn-ghost:hover{background:transparent; border-color:var(--ink-soft);}
+  .msg{margin-top:12px; font-size:13.5px; padding:10px 12px; display:none;}
+  .msg.err{display:block; background:var(--bad-bg); color:var(--bad);}
+  .msg.info{display:block; background:var(--accent-bg); color:var(--ink);}
+
+  .done{display:none; background:var(--panel); border:1px solid var(--rule); padding:28px 22px;}
+  .done.on{display:block;}
+  .done .mark{width:44px; height:44px; background:var(--ok-bg); color:var(--ok); display:grid; place-items:center; margin-bottom:14px;}
+  .done h2{font-size:22px;}
+  .done p{margin-top:8px; color:var(--ink-soft);}
+  .done .when{font-family:'IBM Plex Mono',monospace; color:var(--ink);}
+  .done .btn-ghost{margin-top:18px;}
+
+  footer{padding-block:26px; margin-top:26px; border-top:1px solid var(--rule); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-faint);}
+  footer nav{display:flex; gap:16px;}
+  footer a{text-decoration:none;}
+  footer a:hover{color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">דילוג לטופס</a>
+<div class="wrap">
+  <header>
+    <img src="favicon.svg" alt="" width="30" height="30">
+    <div>
+      <div class="t">דיווח תקלת אינטרנט</div>
+      <div class="s">קיבוץ ניצנים</div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="hero">
+      <h1>האינטרנט נפל? ספרו לנו מתי.</h1>
+      <p>כל דיווח עוזר לזהות מתי ואיפה התקלות חוזרות. בלי הרשמה, ורק שאלה אחת היא חובה.</p>
+    </div>
+
+    <form id="f" novalidate>
+      <div class="q">
+        <div class="q-head"><span class="q-num">01</span><label class="l" for="name">שם מלא <span class="opt">(לא חובה)</span></label></div>
+        <input type="text" id="name" maxlength="80" autocomplete="name">
+      </div>
+
+      <div class="q">
+        <div class="q-head"><span class="q-num">02</span><label class="l" for="when">מתי התחילה התקלה? <span class="req">חובה</span></label></div>
+        <input type="datetime-local" id="when" required aria-describedby="when-hint">
+        <div class="quick" role="group" aria-label="קיצורים לשעת התקלה">
+          <button type="button" class="chip" data-ago="0">עכשיו</button>
+          <button type="button" class="chip" data-ago="15">לפני רבע שעה</button>
+          <button type="button" class="chip" data-ago="30">לפני חצי שעה</button>
+          <button type="button" class="chip" data-ago="60">לפני שעה</button>
+        </div>
+        <p class="hint" id="when-hint">השעה הנוכחית ממולאת מראש. אם התקלה התחילה קודם, אפשר לשנות.</p>
+      </div>
+
+      <div class="q">
+        <div class="q-head"><span class="q-num">03</span><label class="l" for="desc">תיאור התקלה <span class="opt">(לא חובה)</span></label></div>
+        <textarea id="desc" maxlength="1000" placeholder="למשל: אין גלישה בכלל, הוויי-פיי מחובר אבל אתרים לא עולים, האינטרנט איטי מאוד"></textarea>
+      </div>
+
+      <div class="q">
+        <div class="q-head"><span class="q-num">04</span><span class="l" id="photo-l">תמונה של הראוטר הראשי בבית <span class="opt">(לא חובה)</span></span></div>
+        <label class="drop" id="drop">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          <span id="drop-t">צלמו או בחרו תמונה</span>
+          <input type="file" id="photo" accept="image/*" aria-labelledby="photo-l" aria-describedby="photo-hint">
+        </label>
+        <div class="preview" id="preview">
+          <img id="preview-img" alt="תצוגה מקדימה של התמונה שנבחרה">
+          <div>
+            <div class="meta" id="preview-meta"></div>
+            <button type="button" class="btn-ghost btn" id="photo-clear" style="margin-top:8px">הסרת התמונה</button>
+          </div>
+        </div>
+        <p class="hint" id="photo-hint">צלמו את חזית הראוטר כך שרואים אילו נורות דולקות ובאיזה צבע.</p>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn" id="send">שליחת הדיווח</button>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+      </div>
+    </form>
+
+    <div class="done" id="done" tabindex="-1">
+      <div class="mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <h2>הדיווח התקבל</h2>
+      <p>תקלה מ־<span class="when" id="done-when"></span>. תודה, זה עוזר לנו להבין את התמונה.</p>
+      <button type="button" class="btn btn-ghost" id="again">דיווח נוסף</button>
+    </div>
+  </main>
+
+  <footer>
+    <span>NextOne</span>
+    <nav aria-label="מידע משפטי">
+      <a href="privacy.html">פרטיות</a>
+      <a href="terms.html">תנאי שימוש</a>
+      <a href="accessibility.html">נגישות</a>
+    </nav>
+  </footer>
+</div>
+
+<script>
+(function(){
+  // Shared "voice-reminders" Firebase project; this app writes only to "outage_reports".
+  var firebaseConfig = {
+    apiKey: "AIzaSyCFQSpmiSvDepYn08jNkl9Q-zCVdI0BYN4",
+    authDomain: "voice-reminders-d641e.firebaseapp.com",
+    projectId: "voice-reminders-d641e",
+    storageBucket: "voice-reminders-d641e.firebasestorage.app",
+    messagingSenderId: "900498730463",
+    appId: "1:900498730463:web:6899f5d9e9783678b0a86a"
+  };
+  var db = null;
+  try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e){ console.error(e); }
+
+  var MAX_PHOTO_CHARS = 600000; // data-URL length; Firestore docs cap at 1MB
+  var $ = function(id){ return document.getElementById(id); };
+  var form = $('f'), when = $('when'), msg = $('msg'), send = $('send');
+  var photoData = '';
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function toLocalInput(d){
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+  }
+  function setAgo(min){
+    var d = new Date(Date.now() - min*60000);
+    when.value = toLocalInput(d);
+    when.max = toLocalInput(new Date());
+  }
+  setAgo(0);
+  document.querySelectorAll('.chip[data-ago]').forEach(function(b){
+    b.addEventListener('click', function(){ setAgo(+b.dataset.ago); });
+  });
+
+  function show(kind, text){ msg.className = 'msg ' + kind; msg.textContent = text; }
+  function hide(){ msg.className = 'msg'; msg.textContent = ''; }
+
+  // ---- photo: downscale + recompress in the browser so it fits in one Firestore doc
+  function loadImage(file){
+    return new Promise(function(res, rej){
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function(){ URL.revokeObjectURL(url); res(img); };
+      img.onerror = function(){ URL.revokeObjectURL(url); rej(new Error('decode')); };
+      img.src = url;
+    });
+  }
+  function compress(img){
+    var maxSide = 1400, q = 0.8, out = '';
+    for (var i = 0; i < 8; i++){
+      var scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * scale);
+      c.height = Math.round(img.naturalHeight * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      out = c.toDataURL('image/jpeg', q);
+      if (out.length <= MAX_PHOTO_CHARS) return out;
+      if (q > 0.55) q -= 0.1; else maxSide = Math.round(maxSide * 0.8);
+    }
+    return out.length <= MAX_PHOTO_CHARS ? out : '';
+  }
+  $('photo').addEventListener('change', function(e){
+    var file = e.target.files && e.target.files[0];
+    clearPhoto(true);
+    if (!file) return;
+    $('drop-t').textContent = 'מעבד תמונה…';
+    loadImage(file).then(function(img){
+      var data = compress(img);
+      if (!data) throw new Error('size');
+      photoData = data;
+      $('preview-img').src = data;
+      $('preview-meta').textContent = 'התמונה הוקטנה ל־' + Math.round(data.length * 0.75 / 1024) + ' KB לשליחה.';
+      $('preview').classList.add('on');
+      $('drop-t').textContent = 'החלפת תמונה';
+      hide();
+    }).catch(function(){
+      $('drop-t').textContent = 'צלמו או בחרו תמונה';
+      $('photo').value = '';
+      show('err', 'לא הצלחנו לקרוא את התמונה. נסו תמונה אחרת, או שלחו את הדיווח בלעדיה.');
+    });
+  });
+  function clearPhoto(keepInput){
+    photoData = '';
+    $('preview').classList.remove('on');
+    $('preview-img').removeAttribute('src');
+    $('drop-t').textContent = 'צלמו או בחרו תמונה';
+    if (!keepInput) $('photo').value = '';
+  }
+  $('photo-clear').addEventListener('click', function(){ clearPhoto(false); $('photo').focus(); });
+
+  // ---- submit
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    hide();
+    if (!when.value){ show('err', 'צריך לציין מתי התחילה התקלה.'); when.focus(); return; }
+    var faultAt = new Date(when.value);
+    if (isNaN(faultAt)){ show('err', 'שעת התקלה לא תקינה.'); when.focus(); return; }
+    if (faultAt.getTime() > Date.now() + 5*60000){ show('err', 'שעת התקלה לא יכולה להיות בעתיד.'); when.focus(); return; }
+    if (faultAt.getTime() < Date.now() - 30*86400000){ show('err', 'אפשר לדווח על תקלות מ־30 הימים האחרונים בלבד.'); when.focus(); return; }
+    if (!db){ show('err', 'אין חיבור לשרת. בדקו שיש לכם חיבור (למשל דרך הסלולר) ונסו שוב.'); return; }
+    try {
+      var last = +localStorage.getItem('outage_last_sent') || 0;
+      if (Date.now() - last < 60000){ show('info', 'הדיווח הקודם שלכם התקבל לפני פחות מדקה. אפשר לשלוח שוב בעוד רגע.'); return; }
+    } catch(_){}
+
+    send.disabled = true;
+    show('info', 'שולח…');
+    var slow = setTimeout(function(){
+      if (send.disabled) show('info', 'החיבור איטי, ממשיכים לנסות לשלוח. אפשר לעבור לרשת הסלולרית בינתיים.');
+    }, 12000);
+    db.collection('outage_reports').add({
+      name: $('name').value.trim().slice(0,80),
+      faultAt: firebase.firestore.Timestamp.fromDate(faultAt),
+      description: $('desc').value.trim().slice(0,1000),
+      photo: photoData,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(){
+      try { localStorage.setItem('outage_last_sent', String(Date.now())); } catch(_){}
+      $('done-when').textContent = faultAt.toLocaleString('he-IL', {day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit'});
+      form.style.display = 'none';
+      $('done').classList.add('on');
+      $('done').focus();
+    }).catch(function(err){
+      console.error(err);
+      show('err', 'השליחה נכשלה. אם אין לכם אינטרנט בבית, נסו דרך הסלולר.');
+    }).then(function(){ clearTimeout(slow); send.disabled = false; });
+  });
+
+  $('again').addEventListener('click', function(){
+    form.reset(); clearPhoto(false); setAgo(0); hide();
+    $('done').classList.remove('on');
+    form.style.display = '';
+    $('name').focus();
+  });
+})();
+</script>
+</body>
+</html>
