@@ -45,6 +45,9 @@
 
   input[type=password], input[type=date]{font:inherit; font-size:15px; padding:9px 11px; border:1.5px solid var(--rule); background:var(--paper); color:var(--ink); border-radius:0; color-scheme:light dark;}
   input:focus{border-color:var(--accent); outline:none;}
+  input.dmy{width:130px; direction:ltr; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14.5px; padding:9px 11px; border:1.5px solid var(--rule); background:var(--paper); color:var(--ink); border-radius:0;}
+  input.dmy:focus{border-color:var(--accent);}
+  input.dmy[aria-invalid=true]{border-color:var(--bad);}
   .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 18px; font-family:inherit; font-weight:600; font-size:14px; border:1.5px solid transparent; cursor:pointer; border-radius:0; background:var(--accent); color:var(--accent-contrast);}
   .btn:hover{background:var(--accent-strong);}
   .btn:disabled{opacity:.55; cursor:default;}
@@ -131,8 +134,8 @@
 
   <main id="app">
     <div class="bar">
-      <label>מתאריך<input type="date" id="from"></label>
-      <label>עד תאריך<input type="date" id="to"></label>
+      <label>מתאריך<input type="text" class="dmy" id="from" inputmode="numeric" maxlength="10" placeholder="21/07/2026" autocomplete="off"></label>
+      <label>עד תאריך<input type="text" class="dmy" id="to" inputmode="numeric" maxlength="10" placeholder="21/07/2026" autocomplete="off"></label>
       <span class="grow"></span>
       <button class="btn btn-ghost" id="csv">ייצוא ל־Excel ‏(CSV)</button>
     </div>
@@ -180,18 +183,36 @@
 
   function pad(n){ return String(n).padStart(2,'0'); }
   function ymd(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
-  function fmt(d, withDate){
-    var t = pad(d.getHours())+':'+pad(d.getMinutes());
-    return withDate ? d.toLocaleDateString('he-IL',{weekday:'short', day:'numeric', month:'numeric', year:'2-digit'}) + ' ' + t : t;
-  }
+  // All dates shown as dd/mm/yyyy, times as 24h HH:mm
+  function dmy(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear(); }
   function hm(d){ return pad(d.getHours())+':'+pad(d.getMinutes()); }
-  function day(d){ return d.toLocaleDateString('he-IL',{weekday:'short', day:'numeric', month:'numeric'}); }
+  function fmt(d){ return dmy(d) + ' ' + hm(d); }
+  function wd(d){ return d.toLocaleDateString('he-IL',{weekday:'short'}); }
   function ltr(s){ return '<span class="mono" dir="ltr">' + s + '</span>'; }
-  function dtHtml(d){ return esc(day(d)) + ' ' + ltr(hm(d)); }
+  function dayHtml(d){ return esc(wd(d)) + ' ' + ltr(dmy(d)); }
+  function dtHtml(d){ return esc(wd(d)) + ' ' + ltr(dmy(d) + ' ' + hm(d)); }
   function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function parseDmy(s){
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(s).trim());
+    if (!m) return null;
+    var d = new Date(+m[3], +m[2]-1, +m[1]);
+    return (d.getDate() === +m[1] && d.getMonth() === +m[2]-1) ? d : null;
+  }
+  ['from','to'].forEach(function(id){
+    var el = $(id);
+    el.addEventListener('input', function(){
+      var g = el.value.replace(/\D/g,'').slice(0,8), out = g.slice(0,2);
+      if (g.length > 2) out += '/' + g.slice(2,4);
+      if (g.length > 4) out += '/' + g.slice(4);
+      el.value = out;
+      var ok = !!parseDmy(out);
+      if (ok) el.removeAttribute('aria-invalid'); else el.setAttribute('aria-invalid','true');
+      if (ok && parseDmy($('from').value) && parseDmy($('to').value)) subscribe();
+    });
+  });
 
-  $('to').value = ymd(new Date());
-  $('from').value = ymd(new Date(Date.now() - 29*86400000));
+  $('to').value = dmy(new Date());
+  $('from').value = dmy(new Date(Date.now() - 29*86400000));
 
   // ---- auth
   $('login-f').addEventListener('submit', function(e){
@@ -217,8 +238,9 @@
 
   function subscribe(){
     if (unsub) unsub();
-    var from = new Date($('from').value + 'T00:00');
-    var to = new Date($('to').value + 'T23:59:59.999');
+    var from = parseDmy($('from').value), to = parseDmy($('to').value);
+    if (!from || !to) return;
+    to = new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59, 999);
     unsub = db.collection('outage_reports')
       .where('faultAt', '>=', firebase.firestore.Timestamp.fromDate(from))
       .where('faultAt', '<=', firebase.firestore.Timestamp.fromDate(to))
@@ -236,8 +258,6 @@
         $('list').innerHTML = '<div class="err">טעינת הדיווחים נכשלה: ' + esc(err.code || err.message) + '</div>';
       });
   }
-  $('from').addEventListener('change', subscribe);
-  $('to').addEventListener('change', subscribe);
 
   // Group reports whose fault times are within INCIDENT_GAP_MIN of each other (list is newest first).
   function incidents(rows){
@@ -270,7 +290,7 @@
     $('list').innerHTML = groups.map(function(g){
       var sameDay = ymd(g.start) === ymd(g.end);
       var range = g.items.length === 1 ? dtHtml(g.start)
-        : sameDay ? esc(day(g.start)) + ' ' + ltr(hm(g.start) + '–' + hm(g.end))
+        : sameDay ? esc(wd(g.start)) + ' ' + ltr(dmy(g.start) + ' ' + hm(g.start) + '–' + hm(g.end))
         : dtHtml(g.start) + ' עד ' + dtHtml(g.end);
       return '<section class="incident"><div class="inc-head"><span class="t">' + range + '</span>' +
         '<span class="n">' + (g.items.length === 1 ? 'דיווח אחד' : g.items.length + ' דיווחים') + '</span></div>' +
@@ -313,7 +333,7 @@
     var blob = new Blob(['﻿' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'outage-reports_' + $('from').value + '_' + $('to').value + '.csv';
+    a.download = 'outage-reports_' + $('from').value.replace(/\//g,'-') + '_' + $('to').value.replace(/\//g,'-') + '.csv';
     a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
   });
